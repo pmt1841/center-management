@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Cập nhật Học viên')}"></head>
+<body>
+<div id="app">
+    <div th:replace="~{fragments/sidebar :: sidebar('list','student')}"></div>
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3"><a href="#" class="burger-btn d-block d-xl-none"><i class="bi bi-justify fs-3"></i></a>
+        </header>
+        <div class="page-heading">
+            <div th:replace="~{fragments/header.html :: topbar('Hồ sơ học viên')}"></div>
+        </div>
+        <div class="page-title mt-2">
+            <div class="row align-items-center">
+                <div class="col-12 col-md-6 order-md-1 order-last">
+                    <p class="text-subtitle text-muted">Cập nhật thông tin học viên</p>
+                </div>
+
+                <div class="col-12 col-md-6 order-md-2 order-first">
+                    <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/students}">Danh sách học viên</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Chỉnh sửa</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-content">
+            <div class="alert alert-success" th:if="${param.success != null}">
+                <i class="bi bi-check-circle"></i> Cập nhật dữ liệu thành công!
+            </div>
+
+            <div class="alert alert-danger" th:if="${student.studentStatus.name() == 'DROPPED_OUT'}">
+                <i class="bi bi-lock-fill"></i> Học viên này đã <strong>Thôi học</strong>. Toàn bộ tính năng cập nhật
+                điểm, nộp học phí và nhật ký đã bị khóa.
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="info-tab" data-bs-toggle="tab" href="#info" role="tab">Thông
+                                tin cơ bản</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="scores-tab" data-bs-toggle="tab" href="#scores" role="tab">Bảng
+                                điểm</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="diary-tab" data-bs-toggle="tab" href="#diary" role="tab">Nhật ký</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="tuition-tab" data-bs-toggle="tab" href="#tuition" role="tab">Học
+                                phí</a>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="myTabContent">
+
+                        <div class="tab-pane fade show active mt-4" id="info" role="tabpanel">
+                            <form th:action="@{/students/{code}/update-info(code=${student.studentCode})}"
+                                  th:object="${student}" method="post" novalidate>
+
+                                <div class="d-flex flex-column align-items-center mb-4 pb-3 border-bottom">
+                                    <div class="avatar-container position-relative">
+                                        <img th:if="${student.avatarUrl != null and not #strings.isEmpty(student.avatarUrl)}"
+                                             th:src="${student.avatarUrl}"
+                                             alt="Avatar Học Viên"
+                                             class="rounded-circle border border-3 shadow-sm"
+                                             style="width: 120px; height: 120px; object-fit: cover;">
+
+                                        <div th:unless="${student.avatarUrl != null and not #strings.isEmpty(student.avatarUrl)}"
+                                             class="bg-light-primary d-flex align-items-center justify-content-center border border-primary border-2 shadow-sm rounded-circle"
+                                             style="width: 120px; height: 120px;">
+                                            <i class="bi bi-person-bounding-box text-primary" style="font-size: 4rem;"></i>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-light text-secondary border mt-3 fs-6 fw-normal px-3 py-2">
+                                        <i class="bi bi-image me-1"></i> Ảnh đại diện
+                                    </span>
+                                </div>
+
+                                <fieldset th:disabled="${!#authorization.expression('hasAnyRole(''ADMIN'', ''MINISTRY'')')}">
+                                    <div class="row">
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">Email</label>
+                                            <input type="email" class="form-control bg-light" th:field="*{email}" readonly>
+                                            <small class="text-muted">Email không thể thay đổi</small>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">Mã học viên</label>
+                                            <input type="text" class="form-control bg-light" th:field="*{studentCode}"
+                                                   readonly>
+                                            <small class="text-muted">Mã học viên không thể thay đổi</small>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">Họ và tên <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" th:field="*{fullName}"
+                                                   th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid' : ''">
+                                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('fullName')}"
+                                                 th:errors="*{fullName}"></div>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">Số điện thoại <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" th:field="*{phoneNumber}"
+                                                   th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid' : ''"
+                                                   placeholder="VD: 0987654321">
+                                            <div class="invalid-feedback d-block"
+                                                 th:if="${#fields.hasErrors('phoneNumber')}"
+                                                 th:errors="*{phoneNumber}"></div>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">Ngày sinh</label>
+                                            <input type="date" class="form-control" th:field="*{dateOfBirth}"
+                                                   th:classappend="${#fields.hasErrors('dateOfBirth')} ? 'is-invalid' : ''">
+                                            <div class="invalid-feedback d-block"
+                                                 th:if="${#fields.hasErrors('dateOfBirth')}"
+                                                 th:errors="*{dateOfBirth}"></div>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">CCCD / CMND <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" th:field="*{identity}"
+                                                   th:classappend="${#fields.hasErrors('identity')} ? 'is-invalid' : ''">
+                                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('identity')}"
+                                                 th:errors="*{identity}"></div>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">Trạng thái</label>
+                                            <select class="form-select" th:field="*{studentStatus}">
+                                                <option th:each="status : ${statuses}"
+                                                        th:value="${status}"
+                                                        th:text="${status.name() == 'STUDYING' ? 'Đang học' :
+                                                                   (status.name() == 'SUSPENDED' ? 'Đình chỉ' :
+                                                                   (status.name() == 'WAITING_TRANSFER' ? 'Chờ chuyển lớp' : 'Thôi học'))}">
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">Lớp học</label>
+                                            <select class="form-select" th:field="*{classroomId}"
+                                                    th:disabled="${student.studentStatus.name() == 'DROPPED_OUT' or student.studentStatus.name() == 'WAITING_TRANSFER'}">
+                                                <option value="">-- Trống (Chưa/Chờ xếp lớp) --</option>
+                                                <option th:each="c : ${classrooms}" th:value="${c.id}"
+                                                        th:text="${c.classCode}"></option>
+                                            </select>
+
+                                            <input type="hidden"
+                                                   th:if="${student.studentStatus.name() == 'DROPPED_OUT' and student.classroomId != null}"
+                                                   th:name="classroom.id" th:value="${student.classroomId}"/>
+                                        </div>
+
+                                        <div class="col-12 mb-3">
+                                            <label class="form-label fw-bold">Địa chỉ</label>
+                                            <textarea class="form-control" th:field="*{address}" rows="2"
+                                                      th:classappend="${#fields.hasErrors('address')} ? 'is-invalid' : ''"></textarea>
+                                            <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('address')}"
+                                                 th:errors="*{address}"></div>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="d-flex align-items-center gap-2 mt-3">
+
+                                        <button type="submit" class="btn btn-primary d-inline-flex align-items-center">
+                                            <i class="bi bi-save me-2"></i> Lưu thông tin
+                                        </button>
+
+                                        <a th:href="@{/students/{code}/edit(code=${student.studentCode})}" class="btn btn-secondary d-inline-flex align-items-center">
+                                            <i class="bi bi-arrow-clockwise me-2"></i> Làm mới
+                                        </a>
+
+                                    </div>
+
+                                </fieldset>
+
+                                <div sec:authorize="!hasAnyRole('ADMIN', 'MINISTRY')" class="alert alert-light-warning mt-3 mb-0">
+                                    <i class="bi bi-info-circle me-1"></i> Bạn chỉ có quyền xem thông tin, không có quyền chỉnh sửa hồ sơ này.
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade mt-4" id="scores" role="tabpanel">
+
+                            <div class="card bg-light border-0 shadow-sm p-3 mb-4">
+                                <div class="d-flex justify-content-between align-items-end mb-2">
+                                    <span class="fw-bold text-dark"><i class="bi bi-bar-chart-steps text-primary"></i> Tiến độ hoàn thành khóa học</span>
+                                    <span class="text-muted fw-bold small">
+                                        Đạt <span class="text-success" th:text="${passedModules}">0</span> / <span
+                                                                    th:text="${totalModules}">0</span> Học phần
+                                        (<span th:text="${progressPercentage}">0</span>%)
+                                    </span>
+                                </div>
+
+                                <div class="progress" style="height: 15px; border-radius: 10px;">
+                                    <div class="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                                         role="progressbar"
+                                         th:style="'width: ' + ${progressPercentage} + '%;'"
+                                         th:attr="aria-valuenow=${progressPercentage}"
+                                         aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div th:if="${isCourseCompleted}" class="alert alert-success fw-bold">
+                                <i class="bi bi-trophy-fill text-warning"></i> Học viên đã hoàn thành xuất sắc khóa học
+                                này. Bảng điểm đã được đóng băng.
+                            </div>
+
+                            <div th:if="${isCourseCompleted}" class="alert alert-success fw-bold">
+                                <i class="bi bi-trophy-fill text-warning"></i> Học viên đã hoàn thành xuất sắc khóa học
+                                này. Bảng điểm đã được đóng băng.
+                            </div>
+
+                            <div sec:authorize="hasAnyRole('ADMIN', 'LECTURER')" class="mb-4"
+                                 th:if="${student.studentStatus.name() != 'DROPPED_OUT' and !isCourseCompleted}">
+                                <h6 class="mb-3 text-primary"><i class="bi bi-plus-circle"></i> Thêm điểm thi mới / Thi
+                                    lại</h6>
+                                <form th:action="@{/students/{code}/add-score(code=${student.studentCode})}"
+                                      method="post" class="card bg-light p-3 shadow-sm border-0">
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold mb-1">Khóa học</label>
+                                            <input type="text" class="form-control bg-light text-dark fw-bold"
+                                                   th:value="${course.courseName}" readonly>
+                                            <input type="hidden" name="courseCode" th:value="${course.courseCode}">
+                                        </div>
+
+                                        <div class="col-md-6 mb-3" th:if="${currentModule != null}">
+                                            <label class="fw-bold mb-1">Học phần (Module)</label>
+
+                                            <div class="input-group">
+                                                <input type="text" class="form-control bg-light text-dark fw-bold"
+                                                       th:value="${currentModule.moduleName}" readonly>
+
+                                                <span class="input-group-text bg-danger text-white fw-bold border-danger"
+                                                      th:if="${isRetake}">
+                                                    <i class="bi bi-arrow-repeat me-1"></i> Thi lại
+                                                </span>
+                                            </div>
+
+                                            <input type="hidden" name="moduleId" th:value="${currentModule.id}">
+                                        </div>
+                                    </div>
+
+                                    <div class="row align-items-end">
+                                        <div class="col-md-3 mb-3">
+                                            <label class="fw-bold mb-1">Ngày thi <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="date" name="examDate" class="form-control"
+                                                   th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
+                                                   required>
+                                        </div>
+
+                                        <div class="col-md-3 mb-3">
+                                            <label class="fw-bold mb-1">Điểm Lý thuyết <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="number" step="0.1" min="0" max="10" name="theoryScore"
+                                                   class="form-control" required>
+                                        </div>
+
+                                        <div class="col-md-3 mb-3">
+                                            <label class="fw-bold mb-1">Điểm Thực hành <span
+                                                    class="text-danger">*</span></label>
+                                            <input type="number" step="0.1" min="0" max="10" name="practicalScore"
+                                                   class="form-control" required>
+                                        </div>
+
+                                        <div class="col-md-3 mb-3">
+                                            <button type="submit" class="btn btn-primary w-100"><i
+                                                    class="bi bi-check2"></i> Lưu điểm
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <hr>
+                            </div>
+
+                            <form th:if="${!rawScores.isEmpty()}"
+                                  th:action="@{/students/{code}/update-scores(code=${student.studentCode})}"
+                                  th:object="${scoreForm}" method="post">
+                                <fieldset
+                                        th:disabled="${student.studentStatus.name() == 'DROPPED_OUT' or isCourseCompleted}">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover align-middle">
+                                            <thead class="bg-light text-center">
+                                            <tr>
+                                                <th>Khóa học</th>
+                                                <th>Học phần</th>
+                                                <th>Ngày thi</th>
+                                                <th>Lý thuyết</th>
+                                                <th>Thực hành</th>
+                                                <th>Điểm TB</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="item, stat : *{scoreItems}">
+                                                <input type="hidden"
+                                                       th:field="*{scoreItems[__${stat.index}__].scoreId}"/>
+                                                <td>
+                                                    <span class="fw-bold text-dark"
+                                                          th:text="${rawScores[stat.index].course.courseName}">
+                                                    </span>
+                                                </td>
+
+                                                <td>
+                                                    <span class="fw-bold text-dark"
+                                                          th:text="${rawScores[stat.index].courseModule?.moduleName}">
+                                                    </span>
+                                                </td>
+
+                                                <td class="text-center"
+                                                    th:text="${#temporals.format(rawScores[stat.index].examDate, 'dd/MM/yyyy')}"></td>
+
+                                                <td sec:authorize="hasAnyRole('ADMIN', 'MINISTRY')">
+                                                    <input type="number" step="0.1" min="0" max="10"
+                                                           class="form-control text-center"
+                                                           th:field="*{scoreItems[__${stat.index}__].theoryScore}">
+                                                </td>
+                                                <td sec:authorize="hasAnyRole('ADMIN', 'MINISTRY')">
+                                                    <input type="number" step="0.1" min="0" max="10"
+                                                           class="form-control text-center"
+                                                           th:field="*{scoreItems[__${stat.index}__].practicalScore}">
+                                                </td>
+
+                                                <td class="text-center fw-bold"
+                                                    th:classappend="${rawScores[stat.index].averageScore >= 8.0 ? 'text-success' : 'text-danger'}"
+                                                    th:text="${rawScores[stat.index].averageScore}">
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <button sec:authorize="hasAnyRole('ADMIN', 'MINISTRY')" type="submit"
+                                            class="btn btn-success mt-2" th:if="${!isCourseCompleted}">
+                                        <i class="bi bi-save"></i> Cập nhật bảng điểm
+                                    </button>
+                                </fieldset>
+                            </form>
+                        </div>
+
+                        <div class="tab-pane fade mt-4" id="diary" role="tabpanel">
+                            <form th:if="${student.studentStatus.name() != 'DROPPED_OUT'}"
+                                  th:action="@{/students/{code}/add-diary(code=${student.studentCode})}"
+                                  th:object="${newDiary}" method="post" class="mb-4">
+                                <div class="form-group">
+                                    <label class="fw-bold mb-2">Thêm nhật ký mới</label>
+                                    <textarea class="form-control" th:field="*{content}" rows="3"
+                                              placeholder="Ghi chú tình hình học tập, thái độ, vi phạm..."
+                                              required></textarea>
+                                </div>
+                                <input type="hidden" name="authorId" th:value="${currentUser.id}"/>
+                                <input type="hidden" name="studentId" th:value="${student.id}"/>
+
+                                <button type="submit" class="btn btn-primary mt-2">Đăng nhật ký</button>
+                                <hr>
+                            </form>
+
+                            <h6 class="mb-3">Lịch sử nhật ký</h6>
+                            <div th:if="${diaries.isEmpty()}" class="text-muted fst-italic">Chưa có nhật ký nào.</div>
+
+                            <div class="list-group">
+                                <div class="list-group-item list-group-item-action flex-column align-items-start"
+                                     th:each="diary : ${diaries}">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1 text-primary"><i class="bi bi-person-badge"></i> <span
+                                                th:text="${diary.author.fullName}">Giáo vụ</span></h6>
+                                        <small class="text-muted"
+                                               th:text="${#temporals.format(diary.createdDate, 'dd/MM/yyyy')}">3 ngày
+                                            trước</small>
+                                    </div>
+                                    <p class="mb-1 mt-2" th:text="${diary.content}">Học viên đi trễ 15 phút...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade mt-4" id="tuition" role="tabpanel">
+
+                            <div class="card bg-light mb-4 shadow-sm" th:if="${course != null}">
+                                <div class="card-body">
+                                    <div class="row align-items-center mb-3">
+                                        <div class="col-md-6">
+                                            <h6 class="text-uppercase text-muted mb-1">Khóa học hiện tại</h6>
+                                            <h5 class="text-primary font-bold" th:text="${course.courseName}">Tên môn
+                                                học</h5>
+                                        </div>
+                                        <div class="col-md-6 text-md-end">
+                                            <span class="badge bg-secondary p-2 fs-6">
+                                                Học phí: <span
+                                                    th:text="${#numbers.formatDecimal(course.monthlyTuitionFee, 0, 'COMMA', 0, 'POINT')}">0</span> VNĐ/tháng
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-2 d-flex justify-content-between">
+                                        <span class="fw-bold text-success">Tiến độ hoàn thành</span>
+                                        <span class="fw-bold"
+                                              th:text="${paidMonths} + ' / ' + ${totalMonths} + ' tháng (' + ${progressPercent} + '%)'">0 / 0 tháng (0%)</span>
+                                    </div>
+                                    <div class="progress mb-3" style="height: 25px;">
+                                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                                             role="progressbar"
+                                             th:style="'width: ' + ${progressPercent} + '%;'"
+                                             th:text="${progressPercent} + '%'">
+                                        </div>
+                                    </div>
+
+                                    <div class="row text-center">
+                                        <div class="col-6 border-end">
+                                            <div class="text-muted mb-1">Đã nộp</div>
+                                            <h5 class="text-success"
+                                                th:text="${#numbers.formatDecimal(paidAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                                0 VNĐ</h5>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="text-muted mb-1">Tổng học phí khóa học</div>
+                                            <h5 class="text-dark"
+                                                th:text="${#numbers.formatDecimal(totalFee, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                                0 VNĐ</h5>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-warning" th:if="${course == null}">
+                                <i class="bi bi-exclamation-triangle"></i> Học viên chưa được gán vào lớp học nào, hoặc
+                                lớp học chưa có môn học chuẩn.
+                            </div>
+
+                            <hr>
+
+                            <h6 class="mb-3"><i class="bi bi-clock-history"></i> Chi tiết các đợt thanh toán</h6>
+
+                            <div th:if="${tuitions.isEmpty()}" class="alert alert-info">
+                                Hệ thống chưa ghi nhận hoặc chưa sinh hóa đơn đợt học phí nào cho học viên này.
+                            </div>
+
+                            <div class="table-responsive" th:if="${!tuitions.isEmpty()}">
+                                <table class="table table-bordered table-hover">
+                                    <thead class="bg-primary text-white text-center">
+                                    <tr>
+                                        <th>Hạn nộp</th>
+                                        <th>Số tiền (VNĐ)</th>
+                                        <th>Trạng thái</th>
+                                        <th>Ngày đóng</th>
+                                        <th>Phương thức</th>
+<!--                                        <th>Thao tác</th>-->
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="t : ${tuitions}" class="align-middle">
+                                        <td class="text-center font-bold text-danger"
+                                            th:text="${#temporals.format(t.dueDate, 'dd/MM/yyyy')}">15/01/2026
+                                        </td>
+                                        <td class="text-end font-bold"
+                                            th:text="${#numbers.formatDecimal(t.amount, 0, 'COMMA', 0, 'POINT')}">
+                                            500,000
+                                        </td>
+                                        <td class="text-center">
+                                            <span th:if="${t.tuitionStatus.name() == 'PAID'}"
+                                                  class="badge bg-success"><i class="bi bi-check-circle"></i> Đã hoàn thành</span>
+                                            <span th:if="${t.tuitionStatus.name() == 'DEBT'}" class="badge bg-danger"><i
+                                                    class="bi bi-exclamation-circle"></i> Chưa đóng</span>
+                                        </td>
+                                        <td class="text-center"
+                                            th:text="${t.paymentDate != null ? #temporals.format(t.paymentDate, 'dd/MM/yyyy') : '-'}">
+                                            -
+                                        </td>
+                                        <td class="text-center"
+                                            th:text="${t.paymentMethod != null ? t.paymentMethod : '-'}">-
+                                        </td>
+<!--                                        <td class="text-center">-->
+<!--                                            <button th:if="${t.tuitionStatus.name() == 'DEBT' and student.studentStatus.name() != 'DROPPED_OUT'}"-->
+<!--                                                    type="button" class="btn btn-sm btn-outline-primary"-->
+<!--                                                    data-bs-toggle="modal" th:attr="data-bs-target='#payModal'+${t.id}">-->
+<!--                                                <i class="bi bi-cash-coin"></i> Thu tiền-->
+<!--                                            </button>-->
+
+<!--                                            <div th:if="${t.tuitionStatus.name() == 'DEBT' and student.studentStatus.name() != 'DROPPED_OUT'}"-->
+<!--                                                 class="modal fade" th:id="'payModal'+${t.id}" tabindex="-1"-->
+<!--                                                 aria-hidden="true">-->
+<!--                                                <div class="modal-dialog modal-dialog-centered">-->
+<!--                                                    <div class="modal-content text-start">-->
+<!--                                                        <form th:action="@{/students/{code}/pay-tuition/{tuiId}(code=${student.studentCode}, tuiId=${t.id})}"-->
+<!--                                                              method="post">-->
+<!--                                                            <div class="modal-header bg-primary">-->
+<!--                                                                <h5 class="modal-title text-white">Xác nhận thu học phí-->
+<!--                                                                    đợt này</h5>-->
+<!--                                                                <button type="button" class="btn-close btn-close-white"-->
+<!--                                                                        data-bs-dismiss="modal"-->
+<!--                                                                        aria-label="Close"></button>-->
+<!--                                                            </div>-->
+<!--                                                            <div class="modal-body">-->
+<!--                                                                <div class="alert alert-light border border-primary">-->
+<!--                                                                    Số tiền cần thu: <strong class="text-danger fs-5"-->
+<!--                                                                                             th:text="${#numbers.formatDecimal(t.amount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></strong><br>-->
+<!--                                                                    Hạn chót: <strong-->
+<!--                                                                        th:text="${#temporals.format(t.dueDate, 'dd/MM/yyyy')}"></strong>-->
+<!--                                                                </div>-->
+<!--                                                                <div class="mb-3">-->
+<!--                                                                    <label class="fw-bold mb-2">Phương thức thanh toán-->
+<!--                                                                        <span class="text-danger">*</span></label>-->
+<!--                                                                    <select name="paymentMethod" class="form-select"-->
+<!--                                                                            required>-->
+<!--                                                                        <option value="Tiền mặt">💵 Tiền mặt</option>-->
+<!--                                                                        <option value="Chuyển khoản">💳 Chuyển khoản ngân-->
+<!--                                                                            hàng-->
+<!--                                                                        </option>-->
+<!--                                                                    </select>-->
+<!--                                                                </div>-->
+<!--                                                                <div class="mb-3">-->
+<!--                                                                    <label class="fw-bold mb-2">Ghi chú (Tùy-->
+<!--                                                                        chọn)</label>-->
+<!--                                                                    <input type="text" name="note" class="form-control"-->
+<!--                                                                           placeholder="Mã giao dịch, thông tin người nộp thay...">-->
+<!--                                                                </div>-->
+<!--                                                            </div>-->
+<!--                                                            <div class="modal-footer">-->
+<!--                                                                <button type="button" class="btn btn-light"-->
+<!--                                                                        data-bs-dismiss="modal">Hủy bỏ-->
+<!--                                                                </button>-->
+<!--                                                                <button type="submit" class="btn btn-primary"><i-->
+<!--                                                                        class="bi bi-check2-all"></i> Xác nhận đã nhận-->
+<!--                                                                    tiền-->
+<!--                                                                </button>-->
+<!--                                                            </div>-->
+<!--                                                        </form>-->
+<!--                                                    </div>-->
+<!--                                                </div>-->
+<!--                                            </div>-->
+<!--                                            <span th:if="${t.tuitionStatus.name() == 'PAID'}" class="text-success"><i-->
+<!--                                                    class="bi bi-shield-check fs-5"></i></span>-->
+<!--                                        </td>-->
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer th:replace="~{fragments/footer :: footer}"></footer>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script :: script}"></th:block>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Thymeleaf tự động tạo ID cho các thẻ th:field bằng chính tên thuộc tính
+        const statusSelect = document.getElementById("studentStatus");
+        // Vì tên field là classroom.id nên ID sẽ là classroom.id
+        const classroomSelect = document.getElementById("classroomId");
+
+        if (statusSelect && classroomSelect) {
+            statusSelect.addEventListener("change", function () {
+                const selectedStatus = this.value;
+
+                // Nếu chọn Đang học (STUDYING) hoặc Đình chỉ (SUSPENDED) -> Mở khóa ô chọn lớp
+                if (selectedStatus === 'STUDYING' || selectedStatus === 'SUSPENDED') {
+                    classroomSelect.disabled = false;
+                }
+                // Nếu Thôi học (DROPPED_OUT) hoặc Chờ chuyển lớp (WAITING_TRANSFER) -> Khóa lại
+                else {
+                    classroomSelect.disabled = true;
+
+                    // Nếu là chờ chuyển lớp thì tự động nhảy về option "Trống"
+                    if (selectedStatus === 'WAITING_TRANSFER') {
+                        classroomSelect.value = "";
+                    }
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

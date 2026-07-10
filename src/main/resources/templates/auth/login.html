@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - CG Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/bootstrap.css">
+    <link rel="stylesheet" href="/assets/vendors/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="/assets/css/app.css">
+    <link rel="stylesheet" href="/assets/css/pages/auth.css">
+
+    <style>
+        body {
+            /* Thêm ảnh nền kết hợp với lớp phủ mờ (overlay) đen 60% để làm nổi bật form đăng nhập */
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+            url('/assets/images/bg/background.jpg') no-repeat center center fixed;
+            background-size: cover; /* Ép ảnh tự động co giãn vừa kín màn hình */
+        }
+
+        #auth {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+
+        .auth-logo img {
+            height: 60px;
+            object-fit: contain;
+        }
+
+        /* Tùy chọn: Thêm hiệu ứng kính mờ (glassmorphism) nhẹ cho form đăng nhập để xịn xò hơn */
+        .card {
+            /* Thay vì trắng tinh, dùng màu trắng sữa rất nhẹ */
+            background-color: rgba(248, 249, 250, 0.85) !important;
+            /* Tăng độ mờ kính để blended tốt hơn */
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        }
+    </style>
+</head>
+
+<body>
+<div id="auth">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-5 col-xl-4">
+
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-body p-5">
+
+                        <div class="text-center auth-logo mb-4">
+                            <img src="/assets/images/logo.png" alt="Logo">
+                        </div>
+                        <h1 class="auth-title text-center fs-2 mb-2 text-dark">Đăng nhập</h1>
+                        <p class="auth-subtitle text-center text-muted mb-5 fs-6">Đăng nhập bằng tài khoản Quản trị viên cấp.</p>
+
+                        <div th:if="${param.error}" class="alert alert-danger text-center py-2" role="alert">
+                            Email hoặc mật khẩu không chính xác!
+                        </div>
+
+                        <div th:if="${param.logout}" class="alert alert-success text-center py-2" role="alert">
+                            Bạn đã đăng xuất thành công.
+                        </div>
+
+                        <div th:if="${param.expired}" class="alert alert-light-warning text-center py-2" role="alert">
+                            Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.
+                        </div>
+
+                        <form th:action="@{/perform_login}" method="post">
+                            <div class="form-group position-relative has-icon-left mb-4">
+                                <input type="text" class="form-control form-control-xl" placeholder="Nhập email" name="email">
+                                <div class="form-control-icon">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                            </div>
+
+                            <div class="form-group position-relative has-icon-left mb-4">
+                                <input type="password" class="form-control form-control-xl" placeholder="Nhập mật khẩu" name="password">
+                                <div class="form-control-icon">
+                                    <i class="bi bi-shield-lock"></i>
+                                </div>
+                            </div>
+
+                            <div class="form-check form-check-lg d-flex align-items-center">
+                                <input class="form-check-input me-2 mt-0" type="checkbox" name="remember-me" id="rememberOption">
+                                <label class="form-check-label text-gray-600 pt-1" for="rememberOption">
+                                    Giữ đăng nhập
+                                </label>
+                            </div>
+
+                            <button class="btn btn-primary btn-block btn-lg shadow-sm mt-5 w-100">Đăng nhập</button>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <p class="mb-0"><a class="font-bold text-decoration-none" th:href="@{/forgot-password}">Quên mật khẩu?</a></p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

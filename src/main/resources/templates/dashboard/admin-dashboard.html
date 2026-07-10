@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head.html :: head('Dashboard Quản trị viên')}"></head>
+
+<body>
+<div id="app">
+    <div th:replace="~{fragments/sidebar.html :: sidebar('dashboard','')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <div th:replace="~{fragments/header.html :: topbar('Tổng quan Quản trị')}"></div>
+
+        <div class="page-content">
+            <section class="row">
+                <div class="col-12">
+
+                    <div class="row">
+                        <div class="col-6 col-md-4 col-lg mb-3">
+                            <div class="card h-100 mb-0">
+                                <div class="card-body px-3 py-4-5">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 col-12 d-flex justify-content-center">
+                                            <div class="stats-icon purple mb-2 mb-md-0 d-flex align-items-center justify-content-center">
+                                                <i class="iconly-boldUser"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-12 text-center text-md-start">
+                                            <h6 class="text-muted font-semibold">Tổng học viên</h6>
+                                            <h6 class="font-extrabold mb-0" th:text="${totalStudents}">0</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-4 col-lg mb-3">
+                            <div class="card h-100 mb-0">
+                                <div class="card-body px-3 py-4-5">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 col-12 d-flex justify-content-center">
+                                            <div class="stats-icon blue mb-2 mb-md-0 d-flex align-items-center justify-content-center">
+                                                <i class="iconly-boldProfile"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-12 text-center text-md-start">
+                                            <h6 class="text-muted font-semibold">Tổng giảng viên</h6>
+                                            <h6 class="font-extrabold mb-0" th:text="${totalLecturers}">0</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-4 col-lg mb-3">
+                            <div class="card h-100 mb-0">
+                                <div class="card-body px-3 py-4-5">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 col-12 d-flex justify-content-center">
+                                            <div class="stats-icon text-white mb-2 mb-md-0 d-flex align-items-center justify-content-center" style="background-color: #ff9f43;">
+                                                <i class="iconly-boldWork"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-12 text-center text-md-start">
+                                            <h6 class="text-muted font-semibold">Tổng giáo vụ</h6>
+                                            <h6 class="font-extrabold mb-0" th:text="${totalMinistries}">0</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-4 col-lg mb-3">
+                            <div class="card h-100 mb-0">
+                                <div class="card-body px-3 py-4-5">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 col-12 d-flex justify-content-center">
+                                            <div class="stats-icon green mb-2 mb-md-0 d-flex align-items-center justify-content-center">
+                                                <i class="iconly-boldFolder"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-12 text-center text-md-start">
+                                            <h6 class="text-muted font-semibold">Tổng lớp học</h6>
+                                            <h6 class="font-extrabold mb-0" th:text="${totalClasses}">0</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-md-4 col-lg mb-3">
+                            <div class="card h-100 mb-0">
+                                <div class="card-body px-3 py-4-5">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 col-12 d-flex justify-content-center">
+                                            <div class="stats-icon red mb-2 mb-md-0 d-flex align-items-center justify-content-center">
+                                                <i class="iconly-boldDocument"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-12 text-center text-md-start">
+                                            <h6 class="text-muted font-semibold">Tổng khóa học</h6>
+                                            <h6 class="font-extrabold mb-0" th:text="${totalCourses}">0</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h4>Thống kê số lượng nhập học năm nay</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div id="enrollment-growth-chart" th:data-chart="${enrollmentData}"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 col-xl-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Top khóa học thu hút nhất</h4>
+                                </div>
+                                <div class="card-body px-0 py-2">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item text-center text-muted" th:if="${topCourses == null || topCourses.isEmpty()}">
+                                            Chưa có dữ liệu thống kê.
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                                            th:each="course : ${topCourses}">
+                                            <span class="fw-bold text-primary" th:text="${course.courseName}">Java Fullstack</span>
+                                            <span class="badge bg-light-success text-success rounded-pill px-3"
+                                                  th:text="${course.studentCount} + ' học viên'">120 học viên</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-xl-8">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h4>Nhật ký hoạt động hệ thống</h4>
+                                    <a th:href="@{/admin/system-logs}" class="btn btn-sm btn-light-primary">Xem tất cả</a>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-lg mb-0">
+                                            <thead>
+                                            <tr>
+                                                <th>Thời gian</th>
+                                                <th>Người dùng</th>
+                                                <th>Thao tác</th>
+                                                <th>Chi tiết</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:if="${systemLogs == null || systemLogs.isEmpty()}">
+                                                <td colspan="4" class="text-center text-muted">Hệ thống chưa ghi nhận hoạt động nào.</td>
+                                            </tr>
+                                            <tr th:each="log : ${systemLogs}">
+                                                <td class="col-2">
+                                                    <small class="text-muted fw-bold" th:text="${#temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm')}">
+                                                        01/04/2026 09:20
+                                                    </small>
+                                                </td>
+                                                <td class="col-3">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <div class="avatar avatar-sm bg-primary">
+                                                            <span class="avatar-content" th:text="${#strings.substring(log.username, 0, 1).toUpperCase()}">A</span>
+                                                        </div>
+                                                        <span class="font-bold mb-0" th:text="${log.username}">Admin</span>
+                                                    </div>
+                                                </td>
+                                                <td class="col-2">
+                                                    <span class="badge"
+                                                          th:classappend="${log.actionType == 'DELETE' ? 'bg-light-danger text-danger' :
+                                                                          (log.actionType == 'UPDATE' ? 'bg-light-warning text-warning' : 'bg-light-success text-success')}"
+                                                          th:text="${log.actionType}">CREATE</span>
+                                                </td>
+                                                <td class="col-5">
+                                                    <div class="text-truncate" style="max-width: 250px;"
+                                                         th:title="${log.details}" th:text="${log.details}">
+                                                        Đã tạo mới lớp học C1022G1
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+        <footer th:replace="~{fragments/footer.html :: footer}"></footer>
+
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+<script src="/assets/vendors/apexcharts/apexcharts.js"></script>
+<script src="/assets/js/pages/dashboard.js"></script>
+</body>
+</html>

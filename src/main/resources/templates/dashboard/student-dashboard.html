@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head.html :: head('Dashboard Học viên')}"></head>
+
+<body>
+<div id="app">
+
+    <div th:replace="~{fragments/sidebar.html :: sidebar('dashboard','none')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <div class="page-heading">
+
+            <div th:replace="~{fragments/header.html :: topbar('Tổng quan khóa học '+ ${currentCourse})}"></div>
+
+            <div class="page-title mt-2 mb-4">
+                <h3>Xin chào, <span th:text="${currentUser.fullName}" class="text-primary">Nguyễn Văn A</span> 👋</h3>
+                <p class="text-subtitle text-muted">Cùng xem lại tiến độ học tập của bạn nhé</p>
+            </div>
+
+            <section class="section">
+                <div class="row">
+                    <div class="col-6 col-lg-4 col-md-6">
+                        <div class="card">
+                            <div class="card-body px-4 py-4-5">
+                                <div class="row">
+                                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start ">
+                                        <div class="stats-icon blue mb-2">
+                                            <i class="bi bi-star-fill text-primary fs-3"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                                        <h6 class="text-muted font-semibold">Điểm Trung Bình</h6>
+                                        <h6 class="font-extrabold mb-0" th:text="${gpa != null ? gpa : 'Chưa có'}">
+                                            8.5</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-6 col-lg-4 col-md-6">
+                        <div class="card">
+                            <div class="card-body px-4 py-4-5">
+                                <div class="row">
+                                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start ">
+                                        <div class="stats-icon green mb-2">
+                                            <i class="bi bi-book-half text-success fs-3"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                                        <h6 class="text-muted font-semibold">Module đã hoàn thành</h6>
+                                        <h6 class="font-extrabold mb-0">
+                                            <span th:text="${completedModules}">5</span> / <span
+                                                th:text="${totalModules}">12</span>
+                                        </h6>
+                                    </div>
+                                </div>
+                                <div class="progress mt-3" style="height: 6px;">
+                                    <div class="progress-bar bg-success" role="progressbar"
+                                         th:style="'width: ' + (${totalModules > 0 ? (completedModules * 100 / totalModules) : 0}) + '%'"
+                                         aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-4 col-md-12">
+                        <div class="card">
+                            <div class="card-body px-4 py-4-5">
+                                <div class="row">
+                                    <div class="col-md-4 col-lg-12 col-xl-12 col-xxl-5 d-flex justify-content-start ">
+                                        <div class="stats-icon red mb-2">
+                                            <i class="bi bi-wallet2 text-warning fs-3"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8 col-lg-12 col-xl-12 col-xxl-7">
+                                        <h6 class="text-muted font-semibold">Tình trạng học phí</h6>
+                                        <h6 class="font-extrabold mb-0 text-success" th:if="${tuitionStatus == 'PAID'}">
+                                            Đã hoàn thành</h6>
+                                        <h6 class="font-extrabold mb-0 text-danger" th:if="${tuitionStatus == 'DEBT'}">
+                                            Chưa hoàn thành</h6>
+                                        <h6 class="font-extrabold mb-0 text-muted" th:if="${tuitionStatus == null}">Đang
+                                            cập nhật</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-12 col-xl-8">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="card-title m-0">Kết quả thi mới nhất</h5>
+                                <a th:href="@{/profile}" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead>
+                                        <tr>
+                                            <th>Module</th>
+                                            <th>Ngày thi</th>
+                                            <th class="text-center">Điểm TB</th>
+                                            <th class="text-center">Đánh giá</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:if="${recentScores == null or recentScores.isEmpty()}">
+                                            <td colspan="4" class="text-center text-muted fst-italic py-3">Chưa có kết
+                                                quả thi nào gần đây.
+                                            </td>
+                                        </tr>
+
+                                        <tr th:each="score : ${recentScores}">
+                                            <td class="fw-bold" th:text="${score.courseModule.getModuleName()}">Java
+                                                Core
+                                            </td>
+                                            <td th:text="${score.examDate != null ? #temporals.format(score.examDate, 'dd/MM/yyyy') : '-'}">
+                                                20/11/2023
+                                            </td>
+                                            <td class="text-center fw-bold text-primary"
+                                                th:text="${score.averageScore != null ? score.averageScore : '-'}">8.5
+                                            </td>
+                                            <td class="text-center">
+                                                <span th:if="${score.averageScore != null and score.averageScore >= 5.0}"
+                                                      class="badge bg-light-success text-success">Đạt</span>
+                                                <span th:if="${score.averageScore != null and score.averageScore < 5.0}"
+                                                      class="badge bg-light-danger text-danger">Chưa đạt</span>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title m-0">Thông báo hệ thống</h5>
+                            </div>
+                            <div class="card-body px-4">
+
+                                <div class="recent-message d-flex px-3 py-3 border-bottom">
+                                    <div class="avatar avatar-md bg-light-primary me-3 d-flex justify-content-center align-items-center rounded-circle"
+                                         style="width: 40px; height: 40px;">
+                                        <i class="bi bi-bell text-primary"></i>
+                                    </div>
+                                    <div class="name">
+                                        <h6 class="mb-1">Lịch nghỉ lễ</h6>
+                                        <h6 class="text-muted mb-0 fs-6" style="font-weight: 400;">Trung tâm nghỉ lễ
+                                            30/4 - 1/5. Học viên chú ý lịch học bù.</h6>
+                                    </div>
+                                </div>
+
+                                <div class="recent-message d-flex px-3 py-3">
+                                    <div class="avatar avatar-md bg-light-warning me-3 d-flex justify-content-center align-items-center rounded-circle"
+                                         style="width: 40px; height: 40px;">
+                                        <i class="bi bi-calendar-event text-warning"></i>
+                                    </div>
+                                    <div class="name">
+                                        <h6 class="mb-1">Lịch học sắp tới</h6>
+                                        <h6 class="text-muted mb-0 fs-6" style="font-weight: 400;">Tính năng đang được
+                                            cập nhật...</h6>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div th:replace="~{fragments/footer.html :: footer}"></div>
+
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+
+</body>
+</html>

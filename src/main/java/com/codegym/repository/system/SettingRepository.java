@@ -1,0 +1,12 @@
+package com.codegym.repository.system;
+
+import com.codegym.model.system.AppSetting;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface SettingRepository extends JpaRepository<AppSetting, Long> {
+    Optional<AppSetting> findBySettingKey(String settingKey);
+}

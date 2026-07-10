@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head.html :: head('Cập nhật Nội dung Bài học')}"></head>
+
+<body>
+<div id="app">
+    <div th:replace="~{fragments/sidebar.html :: sidebar('list','course')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none"><i class="bi bi-justify fs-3"></i></a>
+        </header>
+
+        <div class="page-heading">
+            <div th:replace="~{fragments/header.html :: topbar('Cập nhật Bài học')}"></div>
+
+            <div class="page-title mt-2">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6 order-md-1 order-last">
+                        <p class="text-subtitle text-muted">Nội dung bài học</p>
+                    </div>
+                    <div class="col-12 col-md-6 order-md-2 order-first">
+                        <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a th:href="@{/courses}">Danh sách khóa học</a></li>
+                                <li class="breadcrumb-item"><a th:href="@{/courses/{code}/edit}">Chỉnh sửa khóa học</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Chỉnh sửa bài học</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section mt-3">
+                <div class="card col-lg-8 offset-lg-2">
+                    <div class="card-header bg-primary border-bottom">
+                        <h4 class="card-title text-white m-0">Nội dung chi tiết: <span th:text="${lesson.title}"></span></h4>
+                    </div>
+
+                    <div class="card-body mt-4">
+                        <form th:action="@{/courses/{code}/modules/{mId}/lessons/{lId}/edit(code=${courseCode}, mId=${lesson.courseModule.id}, lId=${lesson.id})}"
+                              th:object="${lesson}" method="post" class="form">
+
+                            <input type="hidden" th:field="*{id}">
+
+                            <div class="row">
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label fw-bold">Tên bài học <span class="text-danger">*</span></label>
+                                    <input type="text" th:field="*{title}" class="form-control" required>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Loại bài học</label>
+                                    <select th:field="*{type}" class="form-select" id="lessonTypeSelect">
+                                        <option value="VIDEO">Video bài giảng</option>
+                                        <option value="READING">Bài đọc / Văn bản</option>
+                                    </select>
+                                </div>
+
+                                <div id="videoSection" class="col-12 row m-0 p-0">
+                                    <div class="col-md-9 mb-3">
+                                        <label class="form-label fw-bold">Đường dẫn Video (URL) <span class="text-danger">*</span></label>
+                                        <input type="url" th:field="*{videoUrl}" class="form-control" placeholder="Link Youtube, Vimeo, hoặc Google Drive...">
+                                    </div>
+                                </div>
+
+                                <div id="textSection" class="col-12 mb-3" style="display: none;">
+                                    <label class="form-label fw-bold">Nội dung bài đọc <span class="text-danger">*</span></label>
+                                    <textarea th:field="*{content}" id="contentEditor" class="form-control" rows="10"
+                                              placeholder="Nhập nội dung văn bản (Hỗ trợ HTML/Rich Text)..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end gap-2 mt-4 border-top pt-3">
+                                <a th:href="@{/courses/{code}/edit(code=${courseCode})}" class="btn btn-light-secondary d-flex align-items-center gap-1">
+                                    <i class="bi bi-arrow-left-circle"></i> Trở về Khóa học
+                                </a>
+                                <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                                    <i class="bi bi-save"></i> Lưu nội dung
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer th:replace="~{fragments/footer.html :: footer}"></footer>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const typeSelect = document.getElementById('lessonTypeSelect');
+        const videoSection = document.getElementById('videoSection');
+        const textSection = document.getElementById('textSection');
+
+        function toggleSections() {
+            if (typeSelect.value === 'VIDEO') {
+                videoSection.style.display = 'flex';
+                textSection.style.display = 'none';
+            } else if (typeSelect.value === 'READING') {
+                videoSection.style.display = 'none';
+                textSection.style.display = 'block';
+            }
+        }
+
+        // Gọi khi load trang
+        toggleSections();
+
+        // Gọi khi Admin thay đổi loại bài học
+        typeSelect.addEventListener('change', toggleSections);
+
+        // (Tùy chọn) Khởi tạo CKEditor hoặc TinyMCE ở đây cho '#contentEditor'
+        // ClassicEditor.create(document.querySelector('#contentEditor')).catch(error => { console.error(error); });
+    });
+</script>
+
+</body>
+</html>

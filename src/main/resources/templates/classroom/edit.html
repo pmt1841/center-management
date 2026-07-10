@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
+<head th:replace="~{fragments/head.html :: head('Cập nhật Lớp học')}"></head>
+
+<body>
+<div id="app">
+
+    <div th:replace="~{fragments/sidebar.html :: sidebar('list','classroom')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <div class="page-heading">
+
+            <div th:replace="~{fragments/header.html :: topbar('Chỉnh sửa lớp học')}"></div>
+
+            <div class="page-title mt-2">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6 order-md-1 order-last">
+                        <p class="text-subtitle text-muted">Cập nhật thông tin và quản lý học viên</p>
+                    </div>
+
+                    <div class="col-12 col-md-6 order-md-2 order-first">
+                        <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a th:href="@{/classrooms}">Danh sách lớp học</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Chỉnh sửa</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section">
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill"></i> <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header border-bottom">
+                        <h4 class="card-title m-0">Thông tin lớp học</h4>
+                    </div>
+                    <div class="card-body mt-4">
+                        <form th:action="@{/classrooms/{classCode}/edit(classCode=${classroom.classCode})}"
+                              th:object="${classroomDTO}"
+                              method="post" class="form">
+                            <input type="hidden" th:field="*{id}">
+
+                            <div class="row">
+                                <div class="col-md-6 col-12 mb-3">
+                                    <label class="form-label fw-bold">Mã lớp học</label>
+                                    <div class="form-group position-relative has-icon-left mb-0">
+                                        <div class="form-control bg-light text-primary fw-bold"
+                                             th:text="${classroom.classCode}"></div>
+                                        <div class="form-control-icon">
+                                            <i class="bi bi-upc-scan"></i>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Mã lớp học không được phép thay đổi.</small>
+                                </div>
+
+                                <div class="col-md-6 col-12 mb-3">
+                                    <label for="className" class="form-label fw-bold">Tên lớp học <span
+                                            class="text-danger">*</span></label>
+                                    <div class="form-group position-relative has-icon-left mb-0">
+                                        <input type="text" id="className" th:field="*{className}"
+                                               class="form-control"
+                                               th:classappend="${#fields.hasErrors('className')} ? 'is-invalid' : ''"
+                                               required>
+                                        <div class="form-control-icon">
+                                            <i class="bi bi-journal-bookmark"></i>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('className')}"
+                                         th:errors="*{className}"></div>
+                                </div>
+
+                                <div class="col-md-6 col-12 mb-4">
+                                    <label for="subject" class="form-label fw-bold">Thuộc môn học <span
+                                            class="text-danger">*</span></label>
+                                    <div class="form-group position-relative has-icon-left mb-0">
+                                        <select id="subject" th:field="*{courseId}" class="form-select ps-5" required>
+                                            <option th:each="co : ${courses}"
+                                                    th:value="${co.id}"
+                                                    th:text="${co.courseCode + ' - ' + co.courseName}"></option>
+                                        </select>
+                                        <div class="form-control-icon">
+                                            <i class="bi bi-book"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 col-12 mb-4">
+                                    <label for="lecturer" class="form-label fw-bold">Giảng viên phụ trách</label>
+                                    <div class="form-group position-relative has-icon-left mb-0">
+                                        <select id="lecturer" th:field="*{lecturerId}" class="form-select ps-5">
+                                            <option value="">-- Chưa phân công --</option>
+                                            <option th:each="lec : ${lecturers}"
+                                                    th:value="${lec.id}"
+                                                    th:text="${lec.fullName + ' (' + lec.email + ')'}"></option>
+                                        </select>
+                                        <div class="form-control-icon">
+                                            <i class="bi bi-person-badge"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+                                    <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                                        <i class="bi bi-save"></i> Cập nhật thông tin
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-xl-7 col-lg-12 mb-4">
+                        <div class="card h-100 mb-0">
+                            <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+                                <h4 class="card-title m-0">Danh sách học viên
+                                    <span class="badge bg-light-primary text-primary ms-2"
+                                          th:text="${classroom.students.size()} + ' học viên'">0 học viên</span>
+                                </h4>
+                                <a th:href="@{/students/create}"
+                                   class="btn btn-sm btn-success d-flex align-items-center gap-1"
+                                   sec:authorize="hasRole('ADMIN')">
+                                    <i class="bi bi-person-plus"></i> Thêm học viên
+                                </a>
+                            </div>
+                            <div class="card-body mt-3">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Mã HV</th>
+                                            <th>Họ và tên</th>
+                                            <th>Trạng thái</th>
+                                            <th class="text-center">Hành động</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:if="${classroom.students.isEmpty()}">
+                                            <td colspan="5" class="text-center text-muted py-4">Lớp học này hiện chưa có
+                                                học viên nào.
+                                            </td>
+                                        </tr>
+                                        <tr th:each="student, stat : ${classroom.students}">
+                                            <td th:text="${stat.count}">1</td>
+                                            <td th:text="${student.studentCode}" class="fw-bold">SV001</td>
+                                            <td th:text="${student.fullName}">Nguyễn Văn A</td>
+                                            <td>
+                                                <span class="badge bg-success"
+                                                      th:if="${student.studentStatus.name() == 'STUDYING'}">Đang học</span>
+                                                <span class="badge bg-danger"
+                                                      th:if="${student.studentStatus.name() == 'SUSPENDED'}">Đình chỉ</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex justify-content-center align-items-center gap-2">
+                                                    <a th:href="@{/students/{studentCode}/edit(studentCode=${student.studentCode})}"
+                                                       class="btn btn-sm btn-outline-primary"
+                                                       title="Chỉnh sửa thông tin">
+                                                        <i class="bi bi-pencil-square"></i>
+                                                    </a>
+
+                                                    <form th:action="@{/classrooms/{classCode}/students/{studentCode}/remove(classCode=${classroom.classCode}, studentCode=${student.studentCode})}"
+                                                          method="post" class="m-0"
+                                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa học viên này khỏi lớp?');">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                                title="Xóa khỏi lớp">
+                                                            <i class="bi bi-person-x"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-5 col-lg-12 mb-4">
+                        <div class="card h-100 mb-0">
+                            <div class="card-header border-bottom bg-light-info">
+                                <h4 class="card-title text-info m-0"><i class="bi bi-journal-text me-2"></i>Nhật ký lớp
+                                    học</h4>
+                            </div>
+                            <div class="card-body mt-3">
+
+                                <form th:action="@{/classrooms/{classCode}/diaries(classCode=${classroom.classCode})}"
+                                      method="post"
+                                      class="mb-4">
+                                    <div class="form-group mb-2">
+                                    <textarea name="content" class="form-control" rows="3"
+                                              placeholder="Nhập nội dung nhật ký, đánh giá buổi học, điểm danh..."
+                                              required></textarea>
+                                    </div>
+                                    <div class="d-flex justify-content-end">
+                                        <button type="submit"
+                                                class="btn btn-info text-white btn-sm d-flex align-items-center gap-1">
+                                            <i class="bi bi-send"></i> Đăng nhật ký
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <hr>
+
+                                <h6 class="mb-3 text-secondary">Lịch sử ghi chép</h6>
+
+                                <div class="diary-container"
+                                     style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                                    <div th:if="${classDiaries == null or classDiaries.isEmpty()}"
+                                         class="text-center text-muted fst-italic py-3">
+                                        Chưa có ghi chép nào cho lớp học này.
+                                    </div>
+
+                                    <div class="list-group">
+                                        <div th:each="diary : ${classDiaries}"
+                                             class="list-group-item list-group-item-action flex-column align-items-start mb-3 border rounded shadow-sm">
+                                            <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                                <h6 class="mb-0 fw-bold text-primary">
+                                                    <i class="bi bi-person-circle me-1"></i> <span
+                                                        th:text="${diary.author.fullName}">Giảng viên A</span>
+                                                </h6>
+                                                <small class="text-muted bg-light px-2 py-1 rounded"
+                                                       style="font-size: 0.8rem;">
+                                                    <i class="bi bi-calendar3"></i> <span
+                                                        th:text="${#temporals.format(diary.createdDate, 'dd/MM/yyyy')}">01/01/2026</span>
+                                                </small>
+                                            </div>
+                                            <p class="mb-1 text-dark text-sm" style="white-space: pre-wrap;"
+                                               th:text="${diary.content}">Nội dung bài viết...</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+        </div>
+
+        <footer th:replace="~{fragments/footer.html :: footer}"></footer>
+
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/head.html :: head('Hồ sơ cá nhân')}"></head>
+
+<body>
+<div id="app">
+
+    <div th:replace="~{fragments/sidebar.html :: sidebar('','')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <div class="page-heading">
+
+            <div th:replace="~{fragments/header.html :: topbar('Hồ sơ cá nhân')}"></div>
+
+            <div class="page-title mt-2">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6 order-md-1 order-last">
+                        <p class="text-subtitle text-muted">Quản lý thông tin bảo mật và tài khoản của bạn</p>
+                    </div>
+
+                    <div class="col-12 col-md-6 order-md-2 order-first">
+                        <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Hồ sơ cá nhân</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section">
+
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-1"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-octagon me-1"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header border-bottom px-4 pt-4 pb-0">
+                        <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="info-tab" data-bs-toggle="tab"
+                                        data-bs-target="#info" type="button" role="tab" aria-controls="info"
+                                        aria-selected="true">
+                                    <i class="bi bi-person-lines-fill me-1"></i> Thông tin cơ bản
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="security-tab" data-bs-toggle="tab"
+                                        data-bs-target="#security" type="button" role="tab" aria-controls="security"
+                                        aria-selected="false">
+                                    <i class="bi bi-shield-lock me-1"></i> Đổi mật khẩu
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation" sec:authorize="hasRole('STUDENT')">
+                                <button class="nav-link" id="student-records-tab" data-bs-toggle="tab"
+                                        data-bs-target="#student-records" type="button" role="tab"
+                                        aria-controls="student-records" aria-selected="false">
+                                    <i class="bi bi-mortarboard me-1"></i> Kết quả học tập
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation" sec:authorize="hasRole('LECTURER')">
+                                <button class="nav-link" id="lecturer-classes-tab" data-bs-toggle="tab"
+                                        data-bs-target="#lecturer-classes" type="button" role="tab"
+                                        aria-controls="lecturer-classes" aria-selected="false">
+                                    <i class="bi bi-easel me-1"></i> Lớp đang phụ trách
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="card-body mt-4">
+                        <div class="tab-content" id="profileTabsContent">
+
+                            <div class="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
+                                <form th:action="@{/profile/update}" th:object="${user}" method="post"
+                                      enctype="multipart/form-data">
+
+                                    <div class="d-flex flex-column align-items-center mb-4">
+                                        <div class="position-relative">
+                                            <img th:src="${user.avatarUrl != null ? user.avatarUrl : '/images/default-avatar.png'}"
+                                                 alt="Avatar" id="avatarPreview"
+                                                 class="rounded-circle border border-3 shadow-sm"
+                                                 style="width: 130px; height: 130px; object-fit: cover;">
+
+                                            <label for="avatarUpload"
+                                                   class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow"
+                                                   style="cursor: pointer; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;"
+                                                   title="Thay đổi ảnh đại diện">
+                                                <i class="bi bi-camera-fill"></i>
+                                            </label>
+                                        </div>
+
+                                        <input type="file" id="avatarUpload" name="avatarFile" class="d-none"
+                                               accept="image/png, image/jpeg, image/jpg">
+                                        <small class="text-muted mt-2">Định dạng: JPG, PNG. Kích thước tối đa
+                                            2MB.</small>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-0">
+                                                <label class="form-label fw-bold text-muted">Email đăng nhập</label>
+                                                <p class="mb-1 fw-bold fs-6 text-dark" th:text="${user.email}"></p>
+                                                <small class="text-muted fst-italic">Email không được phép thay đổi.</small>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-0">
+                                                <label class="form-label fw-bold text-muted">Chức vụ</label>
+                                                <p class="mb-1 fw-bold fs-6 text-primary" th:text="${user.role.description}"></p>
+                                                <small class="text-muted fst-italic">Chức vụ do hệ thống cấp phát.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label fw-bold">Họ và tên <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" th:field="*{fullName}"
+                                                       th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid' : ''"
+                                                       placeholder="Nhập họ và tên...">
+                                                <div class="invalid-feedback d-block"
+                                                     th:if="${#fields.hasErrors('fullName')}"
+                                                     th:errors="*{fullName}"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label fw-bold">Số điện thoại <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" th:field="*{phoneNumber}"
+                                                       th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid' : ''"
+                                                       placeholder="Nhập số điện thoại...">
+                                                <div class="invalid-feedback d-block"
+                                                     th:if="${#fields.hasErrors('phoneNumber')}"
+                                                     th:errors="*{phoneNumber}"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label fw-bold">Ngày sinh</label>
+                                                <input type="date" class="form-control" th:field="*{dateOfBirth}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label fw-bold">CCCD / CMND <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" th:field="*{identity}"
+                                                       th:classappend="${#fields.hasErrors('identity')} ? 'is-invalid' : ''"
+                                                       placeholder="Nhập số CCCD...">
+                                                <div class="invalid-feedback d-block"
+                                                     th:if="${#fields.hasErrors('identity')}"
+                                                     th:errors="*{identity}"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <div class="form-group">
+                                                <label class="form-label fw-bold">Địa chỉ cư trú</label>
+                                                <input type="text" class="form-control" th:field="*{address}"
+                                                       placeholder="Nhập địa chỉ đầy đủ...">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-end gap-2 mt-4">
+                                        <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                                            <i class="bi bi-save"></i> <span>Cập nhật thông tin</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+                                <form th:action="@{/profile/change-password}" method="post">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label fw-bold">Mật khẩu hiện tại <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="password" name="oldPassword" class="form-control"
+                                                       placeholder="Nhập mật khẩu cũ...">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label fw-bold">Mật khẩu mới <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="password" name="newPassword" class="form-control"
+                                                       placeholder="Tạo mật khẩu mới...">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="form-label fw-bold">Xác nhận mật khẩu mới <span
+                                                        class="text-danger">*</span></label>
+                                                <input type="password" name="confirmPassword" class="form-control"
+                                                       placeholder="Nhập lại mật khẩu mới...">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-end gap-2 mt-4">
+                                        <button type="submit" class="btn btn-warning d-flex align-items-center gap-1">
+                                            <i class="bi bi-key"></i> <span>Đổi mật khẩu</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="tab-pane fade" id="student-records" role="tabpanel"
+                                 aria-labelledby="student-records-tab" sec:authorize="hasRole('STUDENT')">
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-bordered align-middle">
+                                        <thead class="table-light text-center">
+                                        <tr>
+                                            <th scope="col" width="5%">STT</th>
+                                            <th scope="col" width="20%">Khóa học</th>
+                                            <th scope="col" width="15%">Lớp học</th>
+                                            <th scope="col" width="12%">Ngày thi</th>
+                                            <th scope="col" width="10%">Lý thuyết</th>
+                                            <th scope="col" width="10%">Thực hành</th>
+                                            <th scope="col" width="13%">Trung bình</th>
+                                            <th scope="col" width="15%">Kết quả</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:if="${examScores == null or examScores.isEmpty()}">
+                                            <td colspan="8" class="text-center text-muted fst-italic py-4">
+                                                Bạn chưa có dữ liệu điểm thi.
+                                            </td>
+                                        </tr>
+                                        <tr th:each="score, iterStat : ${examScores}">
+                                            <td class="text-center" th:text="${iterStat.count}">1</td>
+                                            <td class="fw-bold text-dark" th:text="${score.course?.courseName}"></td>
+                                            <td class="text-center" th:text="${score.classroom?.classCode}"></td>
+                                            <td class="text-center"
+                                                th:text="${score.examDate != null ? #temporals.format(score.examDate, 'dd/MM/yyyy') : '-'}"></td>
+                                            <td class="text-center"
+                                                th:text="${score.theoryScore != null ? score.theoryScore : '-'}"></td>
+                                            <td class="text-center"
+                                                th:text="${score.practicalScore != null ? score.practicalScore : '-'}"></td>
+                                            <td class="text-center fw-bold text-primary"
+                                                th:text="${score.averageScore != null ? score.averageScore : '-'}"></td>
+                                            <td class="text-center">
+                                                <span th:if="${score.averageScore == null}" class="badge bg-secondary">Chưa có điểm</span>
+                                                <span th:if="${score.averageScore != null and score.averageScore >= 5.0}"
+                                                      class="badge bg-success">Đạt</span>
+                                                <span th:if="${score.averageScore != null and score.averageScore < 5.0}"
+                                                      class="badge bg-danger">Chưa đạt</span>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="lecturer-classes" role="tabpanel"
+                                 aria-labelledby="lecturer-classes-tab" sec:authorize="hasRole('LECTURER')">
+                                <div class="alert alert-light-info text-center py-4">
+                                    <i class="bi bi-info-circle-fill me-2"></i> Danh sách lớp học đang phụ trách sẽ được
+                                    hiển thị tại đây.
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div th:replace="~{fragments/footer.html :: footer}"></div>
+
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const avatarUpload = document.getElementById('avatarUpload');
+        const avatarPreview = document.getElementById('avatarPreview');
+
+        if (avatarUpload && avatarPreview) {
+            avatarUpload.addEventListener('change', function (event) {
+                const file = event.target.files[0];
+
+                // Kiểm tra xem người dùng có chọn file không
+                if (file) {
+                    // Tùy chọn: Validate dung lượng file (ví dụ: max 2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        alert('Kích thước ảnh quá lớn! Vui lòng chọn ảnh dưới 2MB.');
+                        this.value = ''; // Reset input
+                        return;
+                    }
+
+                    // Dùng FileReader để đọc file và hiển thị lên thẻ img
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        avatarPreview.src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

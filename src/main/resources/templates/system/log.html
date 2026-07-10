@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head.html :: head('Nhật ký Hệ thống')}"></head>
+<body>
+<div id="app">
+    <div th:replace="~{fragments/sidebar.html :: sidebar('system-logs', 'admin')}"></div>
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <div class="page-heading">
+            <div class="page-title mb-4">
+                <h3>Nhật ký hoạt động (System Log)</h3>
+            </div>
+
+            <section class="section">
+                <div class="card">
+                    <div class="card-body">
+                        <form th:action="@{/admin/system-logs}" method="get" class="row g-2 justify-content-end mb-4">
+
+                            <div class="col-md-4">
+                                <input type="text" id="searchInput" name="keyword" class="form-control"
+                                       placeholder="Tìm tài khoản, nội dung..." th:value="${keyword}">
+                            </div>
+
+                            <div class="col-md-3">
+                                <select name="actionType" class="form-select auto-submit-select">
+                                    <option value="">-- Tất cả hành động --</option>
+                                    <option th:each="type : ${actionTypes}"
+                                            th:value="${type}"
+                                            th:text="${type}"
+                                            th:selected="${actionType == type}"></option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <select name="dateFilter" class="form-select auto-submit-select">
+                                    <option value="" th:selected="${dateFilter == '' or dateFilter == null}">-- Mọi lúc --</option>
+                                    <option value="today" th:selected="${dateFilter == 'today'}">Hôm nay</option>
+                                    <option value="week" th:selected="${dateFilter == 'week'}">Tuần này</option>
+                                    <option value="month" th:selected="${dateFilter == 'month'}">Tháng này</option>
+                                    <option value="year" th:selected="${dateFilter == 'year'}">Năm nay</option>
+                                </select>
+                            </div>
+
+                            <div class="col-auto">
+                                <a th:href="@{/admin/system-logs}" class="btn btn-outline-secondary d-flex align-items-center gap-1" title="Xóa bộ lọc">
+                                    <i class="bi bi-arrow-clockwise"></i> Làm mới
+                                </a>
+                            </div>
+                        </form>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Thời gian</th>
+                                    <th>Tài khoản</th>
+                                    <th>Hành động</th>
+                                    <th>Chi tiết</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:if="${logPage.isEmpty()}">
+                                    <td colspan="4" class="text-center text-muted">Không tìm thấy nhật ký nào.</td>
+                                </tr>
+                                <tr th:each="log : ${logPage.content}">
+                                    <td th:text="${#temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                                    <td class="fw-bold text-primary" th:text="${log.username}"></td>
+                                    <td>
+                                        <span class="badge bg-secondary" th:text="${log.actionType}"></span>
+                                    </td>
+                                    <td th:text="${log.details}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <nav th:if="${logPage.totalPages > 1}" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${logPage.first ? 'disabled' : ''}">
+                                    <a class="page-link" th:href="@{/admin/system-logs(page=${logPage.number - 1}, keyword=${keyword}, actionType=${actionType}, dateFilter=${dateFilter})}">Trước</a>
+                                </li>
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, logPage.totalPages - 1)}"
+                                    th:classappend="${i == logPage.number ? 'active' : ''}">
+                                    <a class="page-link" th:href="@{/admin/system-logs(page=${i}, keyword=${keyword}, actionType=${actionType}, dateFilter=${dateFilter})}" th:text="${i + 1}"></a>
+                                </li>
+                                <li class="page-item" th:classappend="${logPage.last ? 'disabled' : ''}">
+                                    <a class="page-link" th:href="@{/admin/system-logs(page=${logPage.number + 1}, keyword=${keyword}, actionType=${actionType}, dateFilter=${dateFilter})}">Sau</a>
+                                </li>
+                            </ul>
+                        </nav>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div th:replace="~{fragments/footer.html :: footer}"></div>
+    </div>
+</div>
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+<th:block th:replace="~{fragments/script.html :: searchScript}"></th:block>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/head.html :: head('Cập nhật Người dùng')"></head>
+
+<body>
+<div id="app">
+
+    <div th:replace="~{fragments/sidebar.html :: sidebar('list','user')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <div class="page-heading">
+
+            <div th:replace="~{fragments/header.html :: topbar('Chỉnh sửa người dùng')}"></div>
+
+            <div class="page-title mt-2">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6 order-md-1 order-last">
+                        <p class="text-subtitle text-muted">Cập nhật thông tin tài khoản</p>
+                    </div>
+
+                    <div class="col-12 col-md-6 order-md-2 order-first">
+                        <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a th:href="@{/users}">Danh sách người dùng</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Chỉnh sửa</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section">
+                <form th:action="@{/users/{id}/edit(id=${user.id})}" th:object="${user}" method="post">
+
+                    <div class="card">
+                        <div class="card-header border-bottom">
+                            <h4 class="card-title m-0">Thông tin cơ bản</h4>
+                        </div>
+                        <div class="card-body mt-4">
+
+                            <div class="d-flex flex-column align-items-center mb-4 pb-3 border-bottom">
+                                <div class="avatar-container position-relative">
+                                    <img th:if="${user.avatarUrl != null and not #strings.isEmpty(user.avatarUrl)}"
+                                         th:src="${user.avatarUrl}"
+                                         alt="Avatar"
+                                         class="rounded-circle border border-3 shadow-sm"
+                                         style="width: 120px; height: 120px; object-fit: cover;">
+
+                                    <div th:unless="${user.avatarUrl != null and not #strings.isEmpty(user.avatarUrl)}"
+                                         class="bg-light-primary d-flex align-items-center justify-content-center border border-primary border-2 shadow-sm rounded-circle"
+                                         style="width: 120px; height: 120px;">
+                                        <i class="bi bi-person-fill text-primary" style="font-size: 4rem;"></i>
+                                    </div>
+                                </div>
+                                <span class="badge bg-light text-secondary border mt-3 fs-6 fw-normal px-3 py-2">
+                                    <i class="bi bi-image me-1"></i> Ảnh đại diện
+                                </span>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Email đăng nhập</label>
+                                        <input type="email" class="form-control bg-light" th:field="*{email}" readonly>
+                                        <small class="text-muted">Email không được phép thay đổi.</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Chức vụ (Vai trò)</label>
+                                        <input type="text" class="form-control bg-light"
+                                               th:value="${user.roleDescription}"
+                                               readonly>
+                                        <small class="text-muted">Chức vụ không được phép thay đổi.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Họ và tên <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text"
+                                               class="form-control"
+                                               th:field="*{fullName}"
+                                               th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid' : ''"
+                                               placeholder="Nhập họ và tên...">
+
+                                        <div class="invalid-feedback d-block"
+                                             th:if="${#fields.hasErrors('fullName')}"
+                                             th:errors="*{fullName}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Số điện thoại <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text"
+                                               class="form-control"
+                                               th:field="*{phoneNumber}"
+                                               th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid' : ''"
+                                               placeholder="Nhập số điện thoại...">
+
+                                        <div class="invalid-feedback d-block"
+                                             th:if="${#fields.hasErrors('phoneNumber')}"
+                                             th:errors="*{phoneNumber}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Ngày sinh</label>
+                                        <input type="date" class="form-control" th:field="*{dateOfBirth}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">CCCD / CMND <span class="text-danger">*</span></label>
+                                        <input type="text"
+                                               class="form-control"
+                                               th:field="*{identity}"
+                                               th:classappend="${#fields.hasErrors('identity')} ? 'is-invalid' : ''"
+                                               placeholder="Nhập số CCCD...">
+
+                                        <div class="invalid-feedback d-block"
+                                             th:if="${#fields.hasErrors('identity')}"
+                                             th:errors="*{identity}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label class="form-label fw-bold">Địa chỉ cư trú</label>
+                                        <input type="text" class="form-control" th:field="*{address}"
+                                               placeholder="Nhập địa chỉ đầy đủ...">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mb-5">
+                        <a th:href="@{/users/{uId}/edit(uId=*{id})}"
+                           class="btn btn-light d-flex align-items-center gap-1">
+                            <i class="bi bi-arrow-clockwise"></i>
+                            <span>Làm mới</span>
+                        </a>
+                        <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                            <i class="bi bi-save"></i>
+                            <span>Lưu thay đổi</span>
+                        </button>
+                    </div>
+
+                </form>
+            </section>
+        </div>
+
+        <div th:replace="~{fragments/footer.html :: footer}"></div>
+
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+
+</body>
+</html>

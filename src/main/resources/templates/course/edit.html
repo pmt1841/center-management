@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head.html :: head('Cập nhật Khóa học')}"></head>
+
+<body>
+<div id="app">
+
+    <div th:replace="~{fragments/sidebar.html :: sidebar('list','course')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <div class="page-heading">
+
+            <div th:replace="~{fragments/header.html :: topbar('Chỉnh sửa khóa học')}"></div>
+
+            <div class="page-title mt-2">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6 order-md-1 order-last">
+                        <p class="text-subtitle text-muted">Cập nhật thông tin chi tiết của khóa học</p>
+                    </div>
+
+                    <div class="col-12 col-md-6 order-md-2 order-first">
+                        <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a th:href="@{/courses}">Danh sách khóa học</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Chỉnh sửa</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section">
+                <div class="card">
+                    <div class="card-header border-bottom">
+                        <h4 class="card-title m-0">Thông tin Khóa học</h4>
+                    </div>
+                    <div class="card-body mt-4">
+
+                        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show"
+                             role="alert">
+                            <i class="bi bi-check-circle-fill"></i> <span th:text="${successMessage}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show"
+                             role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${errorMessage}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        <form th:action="@{/courses/{id}/edit(id=${course.courseCode})}" th:object="${course}"
+                              method="post" class="form">
+                            <input type="hidden" th:field="*{id}">
+
+                            <div class="row">
+                                <div class="col-md-6 col-12 mb-3">
+                                    <label class="form-label fw-bold">Mã khóa học</label>
+                                    <div class="form-group position-relative has-icon-left mb-0">
+                                        <div class="form-control bg-light text-primary fw-bold"
+                                             th:text="*{courseCode}"></div>
+                                        <input type="hidden" th:field="*{courseCode}">
+                                        <div class="form-control-icon">
+                                            <i class="bi bi-upc-scan"></i>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Mã khóa học là định danh duy nhất và không thể thay
+                                        đổi.</small>
+                                </div>
+
+                                <div class="col-md-6 col-12 mb-3">
+                                    <label for="courseName" class="form-label fw-bold">Tên khóa học <span
+                                            class="text-danger">*</span></label>
+                                    <div class="form-group position-relative has-icon-left mb-0">
+                                        <input type="text" id="courseName" th:field="*{courseName}"
+                                               class="form-control"
+                                               th:classappend="${#fields.hasErrors('courseName')} ? 'is-invalid' : ''"
+                                               placeholder="VD: Lập trình Java Fullstack" required>
+                                        <div class="form-control-icon">
+                                            <i class="bi bi-book"></i>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('courseName')}"
+                                         th:errors="*{courseName}"></div>
+                                </div>
+
+                                <div class="col-md-6 col-12 mb-3">
+                                    <label for="durationMonths" class="form-label fw-bold">Thời lượng (Tháng) <span
+                                            class="text-danger">*</span></label>
+                                    <div class="form-group position-relative has-icon-left mb-0">
+                                        <input type="number" id="durationMonths" th:field="*{durationMonths}" min="1"
+                                               max="60"
+                                               class="form-control"
+                                               th:classappend="${#fields.hasErrors('durationMonths')} ? 'is-invalid' : ''"
+                                               placeholder="Nhập số tháng..." required>
+                                        <div class="form-control-icon">
+                                            <i class="bi bi-calendar3"></i>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('durationMonths')}"
+                                         th:errors="*{durationMonths}"></div>
+                                </div>
+
+                                <div class="col-md-6 col-12 mb-3">
+                                    <label for="displayTuitionFee" class="form-label fw-bold">Học phí mỗi tháng (VNĐ) <span class="text-danger">*</span></label>
+                                    <div class="form-group position-relative has-icon-left mb-0">
+
+                                        <input type="text" id="displayTuitionFee" class="form-control"
+                                               th:classappend="${#fields.hasErrors('monthlyTuitionFee')} ? 'is-invalid' : ''"
+                                               placeholder="VD: 2,500,000" required>
+
+                                        <input type="hidden" id="monthlyTuitionFee" th:field="*{monthlyTuitionFee}">
+
+                                        <div class="form-control-icon">
+                                            <i class="bi bi-cash-stack"></i>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback d-block"
+                                         th:if="${#fields.hasErrors('monthlyTuitionFee')}"
+                                         th:errors="*{monthlyTuitionFee}"></div>
+                                </div>
+
+                                <div class="col-12 mb-4">
+                                    <label for="description" class="form-label fw-bold">Mô tả khóa học</label>
+                                    <div class="form-group mb-0">
+                                        <textarea id="description" th:field="*{description}" rows="4"
+                                                  class="form-control"
+                                                  th:classappend="${#fields.hasErrors('description')} ? 'is-invalid' : ''"
+                                                  placeholder="Nhập nội dung mô tả chi tiết chương trình học..."></textarea>
+                                    </div>
+                                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('description')}"
+                                         th:errors="*{description}"></div>
+                                </div>
+
+                                <div class="col-12 d-flex justify-content-end gap-2 mt-3 border-top pt-3">
+                                    <a th:href="@{/courses}"
+                                       class="btn btn-light-secondary d-flex align-items-center gap-1">
+                                        <i class="bi bi-x-circle"></i> Trở về
+                                    </a>
+                                    <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                                        <i class="bi bi-save"></i> Cập nhật thông tin
+                                    </button>
+                                </div>
+
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+                        <h4 class="card-title m-0">Chương trình học (Modules)</h4>
+
+                        <button type="button" class="btn btn-success btn-sm d-flex align-items-center gap-2"
+                                onclick="openModuleModal()">
+                            <i class="bi bi-plus-circle m-0"></i> <span>Thêm Chương trình học</span>
+                        </button>
+                    </div>
+                    <div class="card-body mt-4">
+                        <div class="accordion" id="curriculumAccordion">
+
+                            <div th:if="${course.modules == null or course.modules.isEmpty()}" class="text-center text-muted py-4 border rounded bg-light">
+                                Khóa học này chưa có chương trình học nào!
+                            </div>
+
+                            <div class="accordion-item mb-3 border rounded" th:each="m, iterStat : ${course.modules}">
+
+                                <div class="accordion-header d-flex align-items-center bg-light pe-3" th:id="'heading' + ${m.id}">
+                                    <button class="accordion-button collapsed bg-transparent shadow-none fw-bold text-dark flex-grow-1 text-start justify-content-start"
+                                            type="button" data-bs-toggle="collapse"
+                                            th:data-bs-target="'#collapse' + ${m.id}">
+                                        <span class="badge bg-secondary me-2" th:text="'Module ' + ${m.orderNumber}"></span>
+                                        <span th:text="${m.moduleName}"></span>
+                                    </button>
+
+                                    <div class="d-flex gap-2 z-index-1">
+                                        <button type="button" class="btn btn-sm btn-outline-success"
+                                                th:data-module-id="${m.id}" onclick="openLessonModal(this)">
+                                            <i class="bi bi-plus"></i> Thêm Bài học
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="handleEditClick(this)">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div th:id="'collapse' + ${m.id}" class="accordion-collapse collapse" th:data-bs-parent="'#curriculumAccordion'">
+                                    <div class="accordion-body p-0">
+                                        <table class="table table-hover table-borderless mb-0">
+                                            <tbody>
+                                            <tr th:each="lesson, lStat : ${m.lessons}" class="border-bottom">
+                                                <td style="width: 5%" class="text-center text-muted"><i class="bi bi-grip-vertical"></i></td>
+                                                <td style="width: 60%">
+                                                    <i class="bi bi-play-circle text-primary me-2" th:if="${lesson.type.name() == 'VIDEO'}"></i>
+                                                    <i class="bi bi-file-earmark-text text-success me-2" th:if="${lesson.type.name() == 'TEXT'}"></i>
+                                                    <span th:text="${lesson.title}"></span>
+                                                </td>
+                                                <td style="width: 15%" class="text-end pe-4">
+                                                    <a th:href="@{/courses/{code}/modules/{mId}/lessons/{lId}/edit(code=${course.courseCode}, mId=${m.id}, lId=${lesson.id})}" class="btn btn-sm btn-light text-primary">Sửa nội dung</a>
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${m.lessons == null or m.lessons.isEmpty()}">
+                                                <td colspan="4" class="text-center text-muted py-3 small">Chưa có bài học nào trong Module này.</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <footer th:replace="~{fragments/footer.html :: footer}"></footer>
+
+    </div>
+</div>
+
+<div class="modal fade" id="moduleModal" tabindex="-1" aria-labelledby="moduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="moduleModalLabel">Thông tin Bài học</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form th:action="@{/courses/{code}/modules/save(code=${course.courseCode})}" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="moduleId" id="modalModuleId">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tên bài học <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="moduleName" id="modalModuleName" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Thứ tự hiển thị (Module số mấy)</label>
+                        <input type="text" class="form-control bg-light text-muted fw-bold" id="modalOrderNumber" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mô tả nội dung</label>
+                        <textarea class="form-control" name="description" id="modalDescription" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                        <i class="bi bi-save"></i> Lưu bài học
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="lessonModal" tabindex="-1" aria-labelledby="lessonModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success">
+                <h5 class="modal-title text-white" id="lessonModalLabel">Thêm bài học mới</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form th:action="@{/courses/{code}/lessons/quick-save(code=${course.courseCode})}" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="moduleId" id="modalLessonModuleId">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tên bài học <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="lessonTitle" id="modalLessonTitle"
+                               placeholder="VD: Bài 1: Giới thiệu tổng quan" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Loại bài học <span class="text-danger">*</span></label>
+                        <select class="form-select" name="lessonType" id="modalLessonType" required>
+                            <option value="VIDEO">Video bài giảng</option>
+                            <option value="READING">Bài đọc</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success d-flex align-items-center gap-1">
+                        <i class="bi bi-save"></i> Lưu bài học
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+
+<script>
+    function handleEditClick(button) {
+        const id = button.getAttribute('data-id');
+        const name = button.getAttribute('data-name');
+        const desc = button.getAttribute('data-desc');
+        const order = button.getAttribute('data-order');
+        openModuleModal(id, name, desc, order);
+    }
+
+    function openModuleModal(id, name, desc, order) {
+        document.getElementById('modalModuleId').value = id || '';
+        document.getElementById('modalModuleName').value = name || '';
+        document.getElementById('modalDescription').value = desc || '';
+
+        document.getElementById('modalOrderNumber').value = order ? 'Module ' + order : 'Hệ thống tự động xếp vào cuối';
+
+        document.getElementById('moduleModalLabel').innerText = id ? 'Chỉnh sửa chương trình' : 'Thêm bài học mới';
+
+        var myModal = new bootstrap.Modal(document.getElementById('moduleModal'));
+        myModal.show();
+    }
+
+    function openLessonModal(button) {
+        // 1. Lấy ID của module từ attribute 'data-module-id' của nút bấm
+        const moduleId = button.getAttribute('data-module-id');
+
+        // 2. Gán ID đó vào thẻ input hidden trong form
+        document.getElementById('modalLessonModuleId').value = moduleId;
+
+        // 3. Xóa trắng form để tránh bị dính chữ của lần tạo bài học trước
+        document.getElementById('modalLessonTitle').value = '';
+        document.getElementById('modalLessonType').value = 'VIDEO'; // Default
+
+        // 4. Mở modal lên bằng thư viện của Bootstrap 5
+        var lessonModal = new bootstrap.Modal(document.getElementById('lessonModal'));
+        lessonModal.show();
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const displayInput = document.getElementById('displayTuitionFee');
+        const hiddenInput = document.getElementById('monthlyTuitionFee');
+
+        // 1. Xử lý khi vừa load trang (Render dữ liệu cũ từ Database nếu có)
+        if (hiddenInput.value) {
+            // Ép kiểu float để triệt tiêu ký hiệu 1.0E7 của Java
+            let rawValue = parseFloat(hiddenInput.value);
+            if (!isNaN(rawValue)) {
+                // Định dạng thành kiểu tiền tệ có dấu phẩy (VD: 10,000,000)
+                displayInput.value = rawValue.toLocaleString('en-US');
+            }
+        }
+
+        // 2. Xử lý định dạng theo thời gian thực khi người dùng gõ phím
+        displayInput.addEventListener('input', function(e) {
+            // Lọc bỏ tất cả các ký tự không phải là số (chữ cái, dấu phẩy cũ...)
+            let numericValue = e.target.value.replace(/[^0-9]/g, '');
+
+            if (numericValue !== '') {
+                // Gán số chuẩn (không phẩy) vào ô hidden để gửi về Server
+                hiddenInput.value = numericValue;
+
+                // Định dạng lại con số có dấu phẩy và hiển thị lên ô text
+                e.target.value = parseInt(numericValue, 10).toLocaleString('en-US');
+            } else {
+                hiddenInput.value = '';
+                e.target.value = '';
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

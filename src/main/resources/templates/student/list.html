@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments/head.html :: head('Danh sách Học viên')}"></head>
+
+<body>
+
+<div id="app">
+
+    <div th:replace="~{fragments/sidebar.html :: sidebar('list','student')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <div class="page-heading">
+
+            <div th:replace="~{fragments/header.html :: topbar('Danh sách học viên')}"></div>
+
+            <div class="page-title mt-2">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6 order-md-1 order-last">
+                        <p class="text-subtitle text-muted">Quản lý thông tin và trạng thái học tập của học viên</p>
+                    </div>
+                    <div class="col-12 col-md-6 order-md-2 order-first">
+                        <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Danh sách học viên</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="card-title m-0">Dữ liệu Học viên</h4>
+
+<!--                        <a sec:authorize="hasRole('ADMIN')" th:href="@{/students/create}" class="btn btn-success d-flex align-items-center gap-2">-->
+<!--                            <i class="bi bi-plus-circle m-0"></i>-->
+<!--                            <span>Thêm học viên</span>-->
+<!--                        </a>-->
+                    </div>
+                    <div class="card-body">
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+
+                                <form th:action="@{/students}" method="get"
+                                      class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                                    <div class="d-flex align-items-center">
+                                        <label class="me-2 text-nowrap">Hiển thị</label>
+                                        <select name="size" class="form-select w-auto" onchange="this.form.submit()">
+                                            <option value="5" th:selected="${size == 5}">5</option>
+                                            <option value="10" th:selected="${size == 10}">10</option>
+                                            <option value="15" th:selected="${size == 15}">15</option>
+                                            <option value="20" th:selected="${size == 20}">20</option>
+                                            <option value="25" th:selected="${size == 25}">25</option>
+                                        </select>
+                                        <span class="ms-2 text-nowrap">dòng</span>
+                                    </div>
+
+                                    <div class="d-flex gap-2 flex-grow-1 justify-content-end">
+
+                                        <select name="sort" class="form-select auto-submit-select"
+                                                style="max-width: 150px;" onchange="this.form.submit()">
+                                            <option value="latest"
+                                                    th:selected="${currentSort == 'latest' or currentSort == null}">Mới
+                                                nhất
+                                            </option>
+                                            <option value="name_asc" th:selected="${currentSort == 'name_asc'}">Tên
+                                                (A-Z)
+                                            </option>
+                                            <option value="name_desc" th:selected="${currentSort == 'name_desc'}">Tên
+                                                (Z-A)
+                                            </option>
+                                        </select>
+
+                                        <select name="classroomId" class="form-select auto-submit-select"
+                                                style="max-width: 200px;">
+                                            <option value="">Tất cả lớp học</option>
+                                            <option th:each="classroom : ${classrooms}"
+                                                    th:value="${classroom.id}"
+                                                    th:text="${classroom.className}"
+                                                    th:selected="${classroomId != null and classroomId == classroom.id}">
+                                            </option>
+                                        </select>
+
+                                        <select name="status" class="form-select auto-submit-select"
+                                                style="max-width: 200px;">
+                                            <option value="">Tất cả trạng thái</option>
+                                            <option value="STUDYING"
+                                                    th:selected="${status != null and status.name() == 'STUDYING'}">Đang
+                                                học
+                                            </option>
+                                            <option value="WAITING_TRANSFER"
+                                                    th:selected="${status != null and status.name() == 'WAITING_TRANSFER'}">
+                                                Chờ chuyển lớp
+                                            </option>
+                                            <option value="SUSPENDED"
+                                                    th:selected="${status != null and status.name() == 'SUSPENDED'}">
+                                                Đình chỉ
+                                            </option>
+                                            <option value="DROPPED_OUT"
+                                                    th:selected="${status != null and status.name() == 'DROPPED_OUT'}">
+                                                Thôi học
+                                            </option>
+                                        </select>
+
+                                        <div class="input-group" style="max-width: 400px;">
+                                            <input id="searchInput" type="text" class="form-control" name="keyword"
+                                                   th:value="${keyword}"
+                                                   placeholder="Tìm tên, mã HV, SĐT...">
+
+                                            <a th:href="@{/students}"
+                                               class="btn btn-secondary d-flex align-items-center"
+                                               title="Làm mới bộ lọc">
+                                                <i class="bi bi-arrow-counterclockwise"></i>
+                                            </a>
+                                        </div>
+
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="table1">
+                                <thead>
+                                <tr>
+                                    <th>Học viên</th>
+                                    <th>Liên hệ</th>
+                                    <th>Lớp học</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:if="${students.isEmpty()}">
+                                    <td colspan="5" class="text-center text-muted py-4">
+                                        Không tìm thấy dữ liệu nào phù hợp!
+                                    </td>
+                                </tr>
+
+                                <tr th:each="student : ${students}">
+                                    <td>
+                                        <span class="fw-bold text-dark"
+                                              th:text="${student.fullName}">Nguyễn Văn A</span>
+                                        <br>
+                                        <small class="text-muted"
+                                               th:text="${student.studentCode != null ? student.studentCode : 'Chưa có mã'}">HV001</small>
+                                    </td>
+
+                                    <td>
+                                        <div th:text="${student.email}">email@example.com</div>
+                                        <small class="text-secondary"
+                                               th:text="${student.phoneNumber}">0123456789</small>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <div th:if="${student.classroom != null}">
+                                            <a th:href="@{/students(classroomId=${student.classroom.id}, size=${size})}"
+                                               class="badge bg-light-primary text-primary text-decoration-none fw-bold"
+                                               title="Bấm để xem tất cả học viên lớp này">
+                                                <i class="bi bi-door-open me-1"></i>
+                                                <span th:text="${student.classroom.className}">Tên lớp</span>
+                                            </a>
+                                        </div>
+
+                                        <div th:if="${student.classroom == null}">
+                                            <span class="badge bg-light-secondary text-muted fst-italic">
+                                                <i class="bi bi-patch-question me-1"></i> Chưa xếp lớp
+                                            </span>
+                                        </div>
+                                    </td>
+
+                                    <td th:switch="${student.studentStatus != null ? student.studentStatus.name() : ''}">
+                                        <span th:case="'STUDYING'" class="badge bg-success">Đang học</span>
+                                        <span th:case="'WAITING_TRANSFER'" class="badge bg-warning text-dark">Chờ chuyển lớp</span>
+                                        <span th:case="'SUSPENDED'" class="badge bg-danger">Đình chỉ</span>
+                                        <span th:case="'DROPPED_OUT'" class="badge bg-secondary">Thôi học</span>
+                                        <span th:case="*" class="badge bg-light text-dark">Chưa cập nhật</span>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex gap-2">
+
+                                            <th:block th:if="${student.deletedAt == null}">
+                                                <a th:href="@{/students/{code}/edit(code=${student.studentCode})}"
+                                                   class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1">
+                                                    <i class="bi bi-pencil-square mb-0"></i>
+                                                    <span>Sửa</span>
+                                                </a>
+
+                                                <form th:action="@{/students/{code}/delete(code=${student.studentCode})}"
+                                                      method="post" sec:authorize="hasRole('ADMIN')"
+                                                      onsubmit="return confirm('Bạn có chắc chắn muốn vô hiệu hóa học viên này không?');">
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-danger d-inline-flex align-items-center gap-1">
+                                                        <i class="bi bi-trash mb-0"></i>
+                                                        <span>Xóa</span>
+                                                    </button>
+                                                </form>
+                                            </th:block>
+
+                                            <th:block th:if="${student.deletedAt != null}">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-secondary d-inline-flex align-items-center gap-1"
+                                                        disabled title="Không thể sửa học viên đã bị xóa">
+                                                    <i class="bi bi-pencil-square mb-0"></i>
+                                                    <span>Sửa</span>
+                                                </button>
+
+                                                <form th:action="@{/students/{code}/restore(code=${student.studentCode})}"
+                                                      method="post"
+                                                      onsubmit="return confirm('Bạn muốn khôi phục lại tài khoản học viên này?');">
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-success d-inline-flex align-items-center gap-1">
+                                                        <i class="bi bi-arrow-counterclockwise mb-0"></i>
+                                                        <span>Khôi phục</span>
+                                                    </button>
+                                                </form>
+                                            </th:block>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3"
+                             th:if="${students.totalElements > 0}">
+
+                            <div class="text-muted text-sm">
+                                Đang hiển thị <span class="fw-bold text-dark"
+                                                    th:text="${students.number * students.size + 1}">1</span>
+                                đến <span class="fw-bold text-dark"
+                                          th:text="${students.number * students.size + students.numberOfElements}">10</span>
+                                trong tổng số <span class="fw-bold text-dark"
+                                                    th:text="${students.totalElements}">50</span>
+                                bản ghi
+                            </div>
+
+                            <nav aria-label="Page navigation" th:if="${students.totalPages > 1}">
+                                <ul class="pagination pagination-primary m-0">
+
+                                    <li class="page-item" th:classappend="${students.number == 0} ? 'disabled'">
+                                        <a class="page-link"
+                                           th:href="@{/students(page=${students.number - 1}, keyword=${keyword}, size=${size})}">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </li>
+
+                                    <li class="page-item"
+                                        th:each="i : ${#numbers.sequence(0, students.totalPages - 1)}"
+                                        th:classappend="${students.number == i} ? 'active'">
+                                        <a class="page-link"
+                                           th:href="@{/students(page=${i}, keyword=${keyword}, size=${size})}"
+                                           th:text="${i + 1}">1</a>
+                                    </li>
+
+                                    <li class="page-item"
+                                        th:classappend="${students.number == students.totalPages - 1} ? 'disabled'">
+                                        <a class="page-link"
+                                           th:href="@{/students(page=${students.number + 1}, keyword=${keyword}, size=${size})}">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </nav>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div th:replace="~{fragments/footer.html :: footer}"></div>
+
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+<th:block th:replace="~{user/list.html :: searchScript}"></th:block>
+</body>
+</html>

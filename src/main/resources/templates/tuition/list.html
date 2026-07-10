@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head.html :: head('Quản lý Học phí')}"></head>
+
+<style>
+    /* CSS cho bảng chọn ngày */
+    .day-selector-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+        margin-top: 10px;
+    }
+    .day-btn {
+        aspect-ratio: 1; /* Giúp các ô hiển thị hình vuông */
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+</style>
+
+<body>
+<div id="app">
+    <div th:replace="~{fragments/sidebar.html :: sidebar('tuition','')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <div class="page-heading">
+            <div th:replace="~{fragments/header.html :: topbar('Quản lý học phí')}"></div>
+
+            <div class="page-title mt-2">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6 order-md-1 order-last">
+                        <p class="text-subtitle text-muted">Quản lý học phí theo học viên</p>
+                    </div>
+                    <div class="col-12 col-md-6 order-md-2 order-first">
+                        <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Quản lý học phí</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section">
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-1"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-octagon me-1"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="card-title m-0">Danh sách Học phí Học viên</h4> <button type="button" class="btn btn-outline-primary d-flex align-items-center gap-2"
+                                                                                           data-bs-toggle="modal" data-bs-target="#settingModal">
+                        <i class="bi bi-gear m-0"></i>
+                        <span>Cài đặt nhắc học phí</span>
+                    </button>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <form th:action="@{/admin/tuitions}" method="get"
+                                      class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="d-flex align-items-center">
+                                            <label class="me-2 text-nowrap">Hiển thị</label>
+                                            <select name="size" class="form-select w-auto" onchange="this.form.submit()">
+                                                <option value="10" th:selected="${size == 10}">10</option>
+                                                <option value="20" th:selected="${size == 20}">20</option>
+                                                <option value="50" th:selected="${size == 50}">50</option>
+                                            </select>
+                                        </div>
+
+                                        <select name="status" class="form-select w-auto" onchange="this.form.submit()">
+                                            <option value="">-- Tất cả trạng thái --</option>
+                                            <option value="DEBT" th:selected="${status?.name() == 'DEBT'}">Còn nợ</option>
+                                            <option value="PAID" th:selected="${status?.name() == 'PAID'}">Đã hoàn thành</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="input-group w-auto flex-grow-1" style="max-width: 400px;">
+                                        <input type="text" class="form-control" name="keyword" id="searchInput"
+                                               th:value="${keyword}" placeholder="Tìm mã hoặc tên Học viên...">
+                                        <a th:href="@{/admin/tuitions}" class="btn btn-secondary" title="Xóa bộ lọc">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th>Mã HV</th>
+                                    <th>Họ và tên</th>
+                                    <th>Lớp học</th>
+                                    <th class="text-center">Trạng thái</th> <th class="text-center">Số tháng nợ</th>
+                                    <th class="text-end">Tổng tiền nợ</th>
+                                    <th class="text-center">Hành động</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:if="${studentDebtPage.isEmpty()}">
+                                    <td colspan="7" class="text-center text-muted py-4">Không tìm thấy bản ghi học phí nào!</td>
+                                </tr>
+
+                                <tr th:each="item : ${studentDebtPage.content}">
+                                    <td class="fw-bold" th:text="${item.studentCode}">HV001</td>
+                                    <td th:text="${item.fullName}">Nguyễn Văn A</td>
+                                    <td th:text="${item.className}">Lớp Java 01</td>
+
+                                    <td class="text-center">
+                                        <span th:if="${item.unpaidMonths == 0}" class="badge bg-success">Đã hoàn thành</span>
+                                        <span th:if="${item.unpaidMonths > 0}" class="badge bg-warning text-dark">Còn nợ</span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <span th:if="${item.unpaidMonths > 0}" class="badge bg-danger" th:text="${item.unpaidMonths + ' tháng'}">2 tháng</span>
+                                        <span th:if="${item.unpaidMonths == 0}" class="text-muted">-</span>
+                                    </td>
+
+                                    <td class="fw-bold text-end" th:classappend="${item.unpaidMonths > 0 ? 'text-danger' : 'text-success'}">
+                                        <span th:if="${item.unpaidMonths > 0}" th:text="${#numbers.formatDecimal(item.totalDebt, 0, 'COMMA', 0, 'POINT')} + ' đ'">20,000,000 đ</span>
+                                        <span th:if="${item.unpaidMonths == 0}">0 đ</span>
+                                    </td>
+
+                                    <td class="text-center text-nowrap">
+                                        <a th:if="${item.unpaidMonths > 0}" class="btn btn-sm btn-primary" title="Thu tiền"
+                                           th:href="@{/admin/tuitions/students/{code}/pay(code=${item.studentCode})}">
+                                            <i class="bi bi-wallet2"></i> Thu
+                                        </a>
+                                        <a class="btn btn-sm btn-info text-white" title="Xem chi tiết"
+                                           th:href="@{/admin/tuitions/students/{code}/detail(code=${item.studentCode})}">
+                                            <i class="bi bi-eye"></i> Chi tiết
+                                        </a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3"
+                             th:if="${studentDebtPage.totalElements > 0}">
+                        </div>
+                    </div>
+
+            </section>
+        </div>
+
+        <div class="modal fade" id="settingModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-envelope-paper me-2 text-primary"></i>Cài đặt nhắc học
+                            phí tự động</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <form th:action="@{/admin/tuitions/setting-day}" method="post">
+                        <div class="modal-body">
+                            <div class="form-group mb-3">
+                                <label class="form-label fw-bold">
+                                    Ngày gửi thông báo hàng tháng <span class="text-danger">*</span>
+                                </label>
+
+                                <input type="hidden" id="notificationDay" name="notificationDay" th:value="${notificationDay != null ? notificationDay : 10}">
+
+                                <div class="day-selector-grid">
+                                    <button type="button"
+                                            th:each="day : ${#numbers.sequence(1, 28)}"
+                                            class="btn day-btn shadow-sm"
+                                            th:classappend="${(notificationDay != null && notificationDay.toString() == day.toString()) || (notificationDay == null && day == 10)} ? 'btn-primary' : 'btn-outline-secondary'"
+                                            th:text="${day}"
+                                            th:data-day="${day}"
+                                            onclick="selectDay(this)">
+                                    </button>
+                                </div>
+
+                                <small class="form-text text-muted mt-3 d-block">
+                                    <i class="bi bi-info-circle me-1"></i> Hệ thống sẽ tự động gửi thông báo nhắc nợ đến học viên vào ngày này của mỗi tháng. (Chỉ cho phép chọn tối đa đến ngày 28 để tránh lỗi tháng 2).
+                                </small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i> Lưu cài đặt
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div th:replace="~{fragments/footer.html :: footer}"></div>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+<th:block th:replace="~{fragments/script.html :: searchScript}"></th:block>
+
+<script>
+    // Hàm xử lý khi click vào ô ngày
+    function selectDay(btnElement) {
+        // 1. Xóa trạng thái 'đang chọn' của tất cả các nút
+        const allBtns = document.querySelectorAll('.day-btn');
+        allBtns.forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-secondary');
+        });
+
+        // 2. Thêm trạng thái 'đang chọn' (màu xanh) cho nút vừa click
+        btnElement.classList.remove('btn-outline-secondary');
+        btnElement.classList.add('btn-primary');
+
+        // 3. Cập nhật giá trị vào thẻ input hidden
+        const selectedDay = btnElement.getAttribute('data-day');
+        document.getElementById('notificationDay').value = selectedDay;
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+<body>
+
+<div id="sidebar" class="active" th:fragment="sidebar(parentMenu, childMenu)">
+    <div class="sidebar-wrapper active">
+        <div class="sidebar-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="logo">
+                    <a th:href="@{/dashboard}" class="d-flex align-items-center me-3 text-decoration-none text-dark fs-5 fw-bold">
+
+                        <img src="/assets/images/logo.png"
+                             alt="Logo CG"
+                             class="me-2"
+                             style="max-height: 35px; width: auto; object-fit: contain;">
+
+                        <span>CG PORTAL</span>
+                    </a>
+                </div>
+
+                <div class="toggler">
+                    <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle fs-3"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-menu">
+            <ul class="menu">
+                <li class="sidebar-title">Danh mục</li>
+
+                <li class="sidebar-item" th:classappend="${parentMenu eq 'dashboard' ? 'active' : ''}">
+                    <a th:href="@{/dashboard}" class='sidebar-link'>
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Bảng điều khiển</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-title" sec:authorize="hasAnyRole('ADMIN', 'MINISTRY', 'LECTURER')">Quản lý</li>
+
+                <li class="sidebar-item has-sub"
+                    th:classappend="${parentMenu eq 'list' ? 'active' : ''}"
+                    sec:authorize="hasAnyRole('ADMIN', 'MINISTRY', 'LECTURER')">
+                    <a href="#" class='sidebar-link'>
+                        <i class="bi bi-list"></i>
+                        <span>Danh sách</span>
+                    </a>
+                    <ul class="submenu" th:classappend="${parentMenu eq 'list' ? 'active' : ''}">
+                        <li class="submenu-item" sec:authorize="hasRole('ADMIN')"
+                            th:classappend="${childMenu eq 'user' ? 'active' : ''}">
+                            <a th:href="@{/users}">Người dùng</a>
+                        </li>
+                        <li class="submenu-item" sec:authorize="hasAnyRole('MINISTRY', 'ADMIN')"
+                            th:classappend="${childMenu eq 'student' ? 'active' : ''}">
+                            <a th:href="@{/students}">Học viên</a>
+                        </li>
+                        <li class="submenu-item" sec:authorize="hasAnyRole('ADMIN','MINISTRY')"
+                            th:classappend="${childMenu eq 'classroom' ? 'active' : ''}">
+                            <a th:href="@{/classrooms}">Lớp học</a>
+                        </li>
+                        <li class="submenu-item" sec:authorize="hasRole('ADMIN')"
+                            th:classappend="${childMenu eq 'course' ? 'active' : ''}">
+                            <a th:href="@{/courses}">Khóa học</a>
+                        </li>
+                        <li class="submenu-item" sec:authorize="hasRole('LECTURER')"
+                            th:classappend="${childMenu eq 'student' ? 'active' : ''}">
+                            <a th:href="@{/lecturer/students}">Học viên</a>
+                        </li>
+                        <li class="submenu-item" sec:authorize="hasRole('LECTURER')"
+                            th:classappend="${childMenu eq 'classroom' ? 'active' : ''}">
+                            <a th:href="@{/lecturer/classrooms}">Lớp học</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="sidebar-item" th:classappend="${parentMenu eq 'tuition' ? 'active' : ''}"
+                    sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/admin/tuitions}" class='sidebar-link'>
+                        <i class="bi bi-cash-stack"></i>
+                        <span>Học phí</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item" th:classappend="${parentMenu eq 'discount' ? 'active' : ''}"
+                    sec:authorize="hasRole('ADMIN')">
+                    <a th:href="@{/admin/discounts}" class='sidebar-link'>
+                        <i class="bi bi-tags"></i>
+                        <span>Giảm giá</span>
+                    </a>
+                </li>
+
+
+                <li class="sidebar-title" sec:authorize="hasRole('STUDENT')">Học tập</li>
+
+                <li class="sidebar-item" th:classappend="${parentMenu eq 'my-grades' ? 'active' : ''}"
+                    sec:authorize="hasRole('STUDENT')">
+                    <a th:href="@{/profile}" class='sidebar-link'>
+                        <i class="bi bi-mortarboard-fill"></i>
+                        <span>Kết quả học tập</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item" th:classappend="${parentMenu eq 'schedule' ? 'active' : ''}"
+                    sec:authorize="hasRole('STUDENT')">
+                    <a th:href="@{/student/schedule}" class='sidebar-link'>
+                        <i class="bi bi-calendar-week"></i>
+                        <span>Lịch học (Comming soon)</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item" th:classappend="${parentMenu eq 'documents' ? 'active' : ''}"
+                    sec:authorize="hasRole('STUDENT')">
+                    <a href="#" class='sidebar-link'>
+                        <i class="bi bi-folder2-open"></i>
+                        <span>Tài liệu (Comming soon)</span>
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

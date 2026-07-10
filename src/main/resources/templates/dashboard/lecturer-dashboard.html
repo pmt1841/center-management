@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head.html :: head('Dashboard Giảng viên')}"></head>
+
+<body>
+<div id="app">
+    <div th:replace="~{fragments/sidebar.html :: sidebar('dashboard','')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <div th:replace="~{fragments/header.html :: topbar('Tổng quan Giảng viên')}"></div>
+
+        <div class="page-content">
+            <section class="row">
+                <div class="col-12">
+
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <div class="card h-100 mb-0">
+                                <div class="card-body px-4 py-4-5">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 col-12 d-flex justify-content-center">
+                                            <div class="stats-icon purple mb-2 mb-md-0">
+                                                <i class="bi bi-journal-bookmark-fill"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-12 text-center text-md-start">
+                                            <h6 class="text-muted font-semibold">Lớp đang phụ trách</h6>
+                                            <h6 class="font-extrabold mb-0" th:text="${totalClassrooms ?: 0}">4</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6 mb-3">
+                            <div class="card h-100 mb-0">
+                                <div class="card-body px-4 py-4-5">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 col-12 d-flex justify-content-center">
+                                            <div class="stats-icon blue mb-2 mb-md-0">
+                                                <i class="bi bi-people-fill"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-12 text-center text-md-start">
+                                            <h6 class="text-muted font-semibold">Tổng học viên</h6>
+                                            <h6 class="font-extrabold mb-0" th:text="${totalStudents ?: 0}">120</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+
+                        <div class="col-12 col-xl-7">
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h4 class="card-title">Các lớp đang giảng dạy</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-lg mb-0">
+                                            <thead>
+                                            <tr>
+                                                <th>Mã lớp</th>
+                                                <th>Môn học</th>
+                                                <th>Sĩ số</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:if="${activeClassrooms == null or activeClassrooms.isEmpty()}">
+                                                <td colspan="4" class="text-center text-muted py-4">Bạn chưa được phân công lớp nào.</td>
+                                            </tr>
+
+                                            <tr th:each="c : ${activeClassrooms}">
+                                                <td class="font-bold text-primary" th:text="${c.classCode}">C0823I1</td>
+                                                <td th:text="${c.course.courseName}">Java Spring Boot</td>
+                                                <td th:text="${c.students.size()} + ' học viên'">30 hv</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-xl-5 mt-4 mt-xl-0">
+                            <div class="card h-100">
+                                <div class="card-header">
+                                    <h4 class="card-title">Điểm trung bình theo lớp</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div id="avgScoreChart"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+        <footer th:replace="~{fragments/footer.html :: footer}"></footer>
+
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        var classNames = /*[[${chartClassNames}]]*/ [];
+        var avgScores = /*[[${chartAvgScores}]]*/ [];
+
+        var options = {
+            series: [{
+                name: 'Điểm trung bình',
+                data: avgScores
+            }],
+            chart: {
+                type: 'bar',
+                height: 320,
+                toolbar: {
+                    show: false
+                }
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: 4,
+                    columnWidth: '45%',
+                }
+            },
+            colors: ['#435ebe'], // Màu chủ đạo (Primary)
+            dataLabels: {
+                enabled: true,
+                formatter: function (val) {
+                    return val;
+                },
+                style: {
+                    fontSize: '12px',
+                    colors: ["#fff"]
+                }
+            },
+            xaxis: {
+                categories: classNames,
+                axisBorder: {
+                    show: false
+                },
+                axisTicks: {
+                    show: false
+                }
+            },
+            yaxis: {
+                max: 10,
+                title: {
+                    text: 'Điểm (Hệ 10)'
+                }
+            },
+            grid: {
+                strokeDashArray: 4,
+            }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#avgScoreChart"), options);
+        chart.render();
+    });
+</script>
+
+</body>
+</html>

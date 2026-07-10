@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head.html :: head('Danh sách Mã giảm giá')}"></head>
+
+<body>
+<div id="app">
+    <div th:replace="~{fragments/sidebar.html :: sidebar('discount','')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <div class="page-heading">
+            <div th:replace="~{fragments/header.html :: topbar('Quản lý mã giảm giá')}"></div>
+
+            <div class="page-title mt-2">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6 order-md-1 order-last">
+                        <p class="text-subtitle text-muted">Danh sách các mã khuyến mãi, giảm giá học phí</p>
+                    </div>
+                    <div class="col-12 col-md-6 order-md-2 order-first">
+                        <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Mã giảm giá</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section">
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-1"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-octagon me-1"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h4 class="card-title m-0">Danh sách Mã giảm giá</h4>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#createDiscountModal">
+                            <i class="bi bi-plus-circle me-1"></i> Tạo mã mới
+                        </button>
+                    </div>
+                    <div class="card-body mt-3">
+
+                        <form th:action="@{/admin/discounts}" method="get" class="row g-3 mb-4">
+                            <div class="col-md-5">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text"
+                                           id="searchInput"
+                                           class="form-control"
+                                           name="keyword"
+                                           th:value="${keyword}"
+                                           placeholder="Nhập mã code (VD: SUMMER2024)...">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select auto-submit-select" name="status">
+                                    <option value="">-- Tất cả trạng thái --</option>
+                                    <option value="true" th:selected="${status == true}">Đang hoạt động</option>
+                                    <option value="false" th:selected="${status == false}">Đã tắt</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <a href="/admin/discounts" class="btn btn-secondary w-100">
+                                    <i class="bi bi-arrow-clockwise me-1"></i> Làm mới
+                                </a>
+                            </div>
+                        </form>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th class="text-center">STT</th>
+                                    <th>Mã Code</th>
+                                    <th>Giá trị giảm</th>
+                                    <th class="text-center">Lượt dùng</th>
+                                    <th>Thời hạn sử dụng</th>
+                                    <th class="text-center">Trạng thái</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:if="${#lists.isEmpty(discounts)}">
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                        Không tìm thấy mã giảm giá nào.
+                                    </td>
+                                </tr>
+
+                                <tr th:each="discount, iterStat : ${discounts}">
+                                    <td class="text-center" th:text="${iterStat.count}">1</td>
+
+                                    <td>
+                                        <span class="badge bg-dark fs-6" th:text="${discount.code}">SUMMER2024</span>
+                                    </td>
+
+                                    <td>
+                                            <span th:if="${discount.type.name() == 'PERCENT'}"
+                                                  class="fw-bold text-success"
+                                                  th:text="${discount.discountValue + '%'}">
+                                            </span>
+                                        <span th:if="${discount.type.name() == 'AMOUNT'}"
+                                              class="fw-bold text-primary"
+                                              th:text="${#numbers.formatDecimal(discount.discountValue, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                            </span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <span th:text="${discount.currentUsage}">0</span> /
+                                        <span th:text="${discount.maxUsage != null ? discount.maxUsage : '∞'}"
+                                              th:classappend="${discount.maxUsage == null} ? 'fs-5 fw-bold'">∞</span>
+                                    </td>
+
+                                    <td>
+                                        <div class="small">
+                                            <div th:if="${discount.validFrom != null}">
+                                                <span class="text-muted">Từ: </span>
+                                                <span th:text="${#temporals.format(discount.validFrom, 'dd/MM/yyyy HH:mm')}"></span>
+                                            </div>
+                                            <div th:if="${discount.validUntil != null}">
+                                                <span class="text-muted">Đến: </span>
+                                                <span th:text="${#temporals.format(discount.validUntil, 'dd/MM/yyyy HH:mm')}"></span>
+                                            </div>
+                                            <span class="text-success"
+                                                  th:if="${discount.validFrom == null && discount.validUntil == null}">
+                                                    Vĩnh viễn
+                                                </span>
+                                        </div>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <span th:if="${discount.active}" class="badge bg-success">Hoạt động</span>
+                                        <span th:unless="${discount.active}" class="badge bg-secondary">Đã tắt</span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a th:href="@{/admin/discounts/edit/{id}(id=${discount.id})}"
+                                               class="btn btn-sm btn-outline-primary" title="Chỉnh sửa">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+
+                                            <form th:action="@{/admin/discounts/toggle/{id}(id=${discount.id})}"
+                                                  method="post" class="m-0">
+                                                <button type="submit" class="btn btn-sm"
+                                                        th:classappend="${discount.active ? 'btn-outline-danger' : 'btn-outline-success'}"
+                                                        th:title="${discount.active ? 'Tắt mã này' : 'Bật mã này'}"
+                                                        onclick="return confirm('Bạn có chắc chắn muốn thay đổi trạng thái mã này?');">
+                                                    <i th:class="${discount.active ? 'bi bi-lock-fill' : 'bi bi-unlock-fill'}"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div th:replace="~{fragments/footer.html :: footer}"></div>
+    </div>
+</div>
+
+<div class="modal fade" id="createDiscountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title text-white">Thêm mã giảm giá mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/admin/discounts/create}" method="post">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Mã Code <span class="text-danger">*</span></label>
+                            <input type="text" name="code" class="form-control" placeholder="Ví dụ: GIAM20" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Loại giảm giá</label>
+                            <select name="type" class="form-select">
+                                <option value="PERCENT">Phần trăm (%)</option>
+                                <option value="AMOUNT">Số tiền cố định (VNĐ)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Giá trị giảm <span class="text-danger">*</span></label>
+                            <input type="number" name="discountValue" class="form-control" min="0" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tổng lượt dùng</label>
+                            <input type="number" name="maxUsage" class="form-control"
+                                   placeholder="Để trống nếu không giới hạn">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Hiệu lực từ</label>
+                            <input type="datetime-local" name="validFrom" class="form-control">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Đến ngày</label>
+                            <input type="datetime-local" name="validUntil" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu mã</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+<th:block th:replace="~{fragments/script.html :: searchScript}"></th:block>
+</body>
+</html>

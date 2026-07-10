@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head.html :: head('Thêm Lớp học')}"></head>
+
+<body>
+<div id="app">
+
+    <div th:replace="~{fragments/sidebar.html :: sidebar('list','classroom')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <div class="page-heading">
+
+            <div th:replace="~{fragments/header.html :: topbar('Thêm lớp học')}"></div>
+
+            <div class="page-title mt-2">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6 order-md-1 order-last">
+                        <p class="text-subtitle text-muted">Nhập thông tin chi tiết để tạo lớp học mới</p>
+                    </div>
+
+                    <div class="col-12 col-md-6 order-md-2 order-first">
+                        <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a th:href="@{/classrooms}">Danh sách lớp học</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Thêm mới</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title">Thông tin lớp học</h4>
+                    </div>
+                    <div class="card-body">
+
+                        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle-fill"></i> <span th:text="${successMessage}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i> <span th:text="${errorMessage}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        <form th:action="@{/classrooms/create}" th:object="${classroom}" method="post" class="form">
+                            <div class="row">
+
+                                <div class="col-md-6 col-12 mb-3">
+                                    <label for="classCode" class="form-label">Mã lớp học <span class="text-danger">*</span></label>
+                                    <div class="form-group position-relative has-icon-left mb-0">
+                                        <input type="text" id="classCode" th:field="*{classCode}"
+                                               class="form-control" th:classappend="${#fields.hasErrors('classCode')} ? 'is-invalid' : ''"
+                                               placeholder="Nhập mã lớp" required>
+                                        <div class="form-control-icon">
+                                            <i class="bi bi-upc-scan"></i>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('classCode')}" th:errors="*{classCode}"></div>
+                                </div>
+
+                                <div class="col-md-6 col-12 mb-3">
+                                    <label for="className" class="form-label">Tên lớp học <span class="text-danger">*</span></label>
+                                    <div class="form-group position-relative has-icon-left mb-0">
+                                        <input type="text" id="className" th:field="*{className}"
+                                               class="form-control" th:classappend="${#fields.hasErrors('className')} ? 'is-invalid' : ''"
+                                               placeholder="Nhập tên lớp học" required>
+                                        <div class="form-control-icon">
+                                            <i class="bi bi-journal-bookmark"></i>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('className')}" th:errors="*{className}"></div>
+                                </div>
+
+                                <div class="col-md-6 col-12 mb-4">
+                                    <label for="course" class="form-label">Thuộc khóa học <span class="text-danger">*</span></label>
+                                    <div class="form-group position-relative has-icon-left mb-0">
+                                        <select id="course" th:field="*{course}"
+                                                class="form-select ps-5" th:classappend="${#fields.hasErrors('course')} ? 'is-invalid' : ''" required>
+                                            <option value="" disabled selected>-- Chọn khóa học --</option>
+                                            <option th:each="co : ${courses}"
+                                                    th:value="${co.id}"
+                                                    th:text="${co.courseCode + ' - ' + co.courseName}"></option>
+                                        </select>
+                                        <div class="form-control-icon">
+                                            <i class="bi bi-book"></i>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('course')}" th:errors="*{course}"></div>
+                                </div>
+
+                                <div class="col-md-6 col-12 mb-4">
+                                    <label for="lecturer" class="form-label">Giảng viên phụ trách</label>
+                                    <div class="form-group position-relative has-icon-left mb-0">
+                                        <select id="lecturer" th:field="*{lecturer}"
+                                                class="form-select ps-5" th:classappend="${#fields.hasErrors('lecturer')} ? 'is-invalid' : ''">
+                                            <option value="">-- Chưa phân công --</option>
+                                            <option th:each="lec : ${lecturers}"
+                                                    th:value="${lec.id}"
+                                                    th:text="${lec.fullName + ' (' + lec.lecturerCode + ')'}"></option>
+                                        </select>
+                                        <div class="form-control-icon">
+                                            <i class="bi bi-person-badge"></i>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('lecturer')}" th:errors="*{lecturer}"></div>
+                                </div>
+
+                                <div class="col-12 d-flex justify-content-end gap-2 mt-3">
+                                    <a th:href="@{/classrooms}" class="btn btn-light-secondary d-flex align-items-center gap-1">
+                                        <i class="bi bi-x-circle"></i> Hủy bỏ
+                                    </a>
+                                    <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                                        <i class="bi bi-save"></i> Lưu thông tin
+                                    </button>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer th:replace="fragments/footer.html :: footer"></footer>
+
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+
+</body>
+</html>

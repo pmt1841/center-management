@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head.html :: head('Dashboard Giáo vụ')}"></head>
+
+<body>
+<div id="app">
+    <div th:replace="~{fragments/sidebar.html :: sidebar('dashboard','')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <div th:replace="~{fragments/header.html :: topbar('Tổng quan Giáo vụ')}"></div>
+
+        <div class="page-content">
+            <section class="row">
+                <div class="col-12">
+
+                    <div class="row">
+                        <div class="col-6 col-lg-3 col-md-6 mb-3">
+                            <div class="card h-100 mb-0">
+                                <div class="card-body px-3 py-4-5">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 col-12 d-flex justify-content-center">
+                                            <div class="stats-icon purple mb-2 mb-md-0">
+                                                <i class="iconly-boldShow"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-12 text-center text-md-start">
+                                            <h6 class="text-muted font-semibold">Học viên đang học</h6>
+                                            <h6 class="font-extrabold mb-0" th:text="${activeStudents}">0</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3 col-md-6 mb-3">
+                            <div class="card h-100 mb-0">
+                                <div class="card-body px-3 py-4-5">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 col-12 d-flex justify-content-center">
+                                            <div class="stats-icon blue mb-2 mb-md-0">
+                                                <i class="iconly-boldBookmark"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-12 text-center text-md-start">
+                                            <h6 class="text-muted font-semibold">Lớp đang mở</h6>
+                                            <h6 class="font-extrabold mb-0" th:text="${activeClasses}">0</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3 col-md-6 mb-3">
+                            <div class="card h-100 mb-0">
+                                <div class="card-body px-3 py-4-5">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 col-12 d-flex justify-content-center">
+                                            <div class="stats-icon green mb-2 mb-md-0">
+                                                <i class="iconly-boldDocument"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-12 text-center text-md-start">
+                                            <h6 class="text-muted font-semibold">Nhật ký hôm nay</h6>
+                                            <h6 class="font-extrabold mb-0" th:text="${diariesToday}">0</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-lg-3 col-md-6 mb-3">
+                            <div class="card h-100 mb-0">
+                                <div class="card-body px-3 py-4-5">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 col-12 d-flex justify-content-center">
+                                            <div class="stats-icon red mb-2 mb-md-0">
+                                                <i class="iconly-boldDanger"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8 col-12 text-center text-md-start">
+                                            <h6 class="text-muted font-semibold">Học viên cần lưu ý</h6>
+                                            <h6 class="font-extrabold mb-0" th:text="${warningStudents}">0</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Biểu đồ Điểm trung bình hàng tháng</h4>
+                                </div>
+                                <div class="card-body">
+                                    <div id="monthly-avg-score" th:data-score="${chartData}"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 col-xl-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4>Điểm trung bình lớp (Tháng này)</h4>
+                                </div>
+                                <div class="card-body px-0 py-2">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item text-center text-muted" th:if="${averageScores == null || averageScores.isEmpty()}">
+                                            Chưa có dữ liệu điểm số.
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                                            th:each="classroomAvg : ${averageScores}">
+                                            <span class="fw-bold text-primary" th:text="${classroomAvg.key}">C1022G1</span>
+                                            <span class="badge rounded-pill px-3"
+                                                  th:classappend="${classroomAvg.value >= 8.0 ? 'bg-light-success text-success' : (classroomAvg.value >= 5.0 ? 'bg-light-warning text-warning' : 'bg-light-danger text-danger')}"
+                                                  th:text="${classroomAvg.value}">8.5</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-xl-8">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h4>Nhật ký lớp học gần đây</h4>
+<!--                                    <a href="#" class="btn btn-sm btn-light-primary">Xem tất cả</a>-->
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-lg mb-0">
+                                            <thead>
+                                            <tr>
+                                                <th>Thời gian</th>
+                                                <th>Người viết</th>
+                                                <th>Lớp học</th>
+                                                <th>Nội dung</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:if="${classDiaries == null || classDiaries.isEmpty()}">
+                                                <td colspan="4" class="text-center text-muted">Chưa có nhật ký nào gần đây.</td>
+                                            </tr>
+                                            <tr th:each="diary: ${classDiaries}">
+                                                <td class="col-2">
+                                                    <small class="text-muted fw-bold" th:text="${#temporals.format(diary.createdDate, 'dd/MM/yyyy')}">
+                                                        01/04/2026
+                                                    </small>
+                                                </td>
+                                                <td class="col-3">
+                                                    <span class="font-bold" th:text="${diary.author.fullName}">Giảng viên A</span>
+                                                </td>
+                                                <td class="col-2">
+                                                    <span class="badge bg-light-primary text-primary" th:text="${diary.classroom.classCode}">Lớp</span>
+                                                </td>
+                                                <td class="col-5">
+                                                    <div class="text-truncate" style="max-width: 250px;"
+                                                         th:title="${diary.content}" th:text="${diary.content}">
+                                                        Nội dung nhật ký...
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+
+        <footer th:replace="~{fragments/footer.html :: footer}"></footer>
+
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+<script src="/assets/vendors/apexcharts/apexcharts.js"></script>
+<script src="/assets/js/pages/dashboard.js"></script>
+</body>
+</html>

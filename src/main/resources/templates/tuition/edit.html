@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head.html :: head('Chỉnh sửa bản ghi Học phí')}"></head>
+
+<body>
+<div id="app">
+    <div th:replace="~{fragments/sidebar.html :: sidebar('tuition','')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <div class="page-heading">
+            <div th:replace="~{fragments/header.html :: topbar('Chỉnh sửa học phí')}"></div>
+
+            <div class="page-title mt-2">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6 order-md-1 order-last">
+                        <p class="text-subtitle text-muted">Cập nhật thông tin đóng học phí của học viên</p>
+                    </div>
+                    <div class="col-12 col-md-6 order-md-2 order-first">
+                        <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a th:href="@{/admin/tuitions}">Quản lý học phí</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Chỉnh sửa</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section">
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-1"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-octagon me-1"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div class="row">
+                    <div class="col-12 col-lg-8 offset-lg-2">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h4 class="card-title m-0">
+                                    <i class="bi bi-pencil-square me-2"></i>Chi tiết bản ghi học phí
+                                </h4>
+                            </div>
+                            <div class="card-body mt-3">
+                                <form th:action="@{/admin/tuitions/edit/{id}(id=${payment.id})}" th:object="${payment}" method="post">
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Mã Học viên</label>
+                                            <input type="text" class="form-control bg-light" th:value="*{student.studentCode}" readonly>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Tên Học viên</label>
+                                            <input type="text" class="form-control bg-light" th:value="*{student.fullName}" readonly>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4">
+
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <div class="alert alert-info py-2 mb-0 d-flex align-items-center">
+                                                <i class="bi bi-calendar-check fs-4 me-2 d-flex"></i>
+                                                <span class="fw-bold me-1">Kỳ thanh toán: </span>
+                                                <span class="fs-6 text-danger fw-bold"
+                                                      th:text="${payment.dueDate != null ? 'Tháng ' + payment.dueDate.monthValue + ' năm ' + payment.dueDate.year : 'Chưa xác định'}">
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="amount" class="form-label fw-bold">Số tiền (VNĐ)</label>
+                                            <input type="number" class="form-control bg-light" id="amount" th:field="*{amount}" readonly>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="tuitionStatus" class="form-label fw-bold">Trạng thái <span class="text-danger">*</span></label>
+                                            <select class="form-select" id="tuitionStatus" th:field="*{tuitionStatus}" required>
+                                                <option value="DEBT">Còn nợ</option>
+                                                <option value="PAID">Đã hoàn thành</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="dueDate" class="form-label fw-bold">Hạn đóng <span class="text-danger">*</span></label>
+                                            <input type="date" class="form-control bg-light" id="dueDate" th:field="*{dueDate}" readonly>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="paymentDate" class="form-label fw-bold">Ngày thực đóng</label>
+                                            <input type="datetime-local" class="form-control" id="paymentDate" th:field="*{paymentDate}">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="paymentMethod" class="form-label fw-bold">Phương thức thanh toán</label>
+                                        <select class="form-select" id="paymentMethod" th:field="*{paymentMethod}">
+                                            <option value="">-- Chọn phương thức --</option>
+                                            <option value="CASH">Tiền mặt</option>
+                                            <option value="CREDIT">Chuyển khoản</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="note" class="form-label fw-bold">Ghi chú</label>
+                                        <textarea class="form-control" id="note" th:field="*{note}" rows="3" placeholder="Nhập ghi chú nếu có..."></textarea>
+                                    </div>
+
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a th:href="@{/admin/tuitions/students/{code}/detail(code=${payment.student.studentCode})}" class="btn btn-light">
+                                            <i class="bi bi-x-circle me-1"></i> Hủy / Quay lại
+                                        </a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-save me-1"></i> Lưu thay đổi
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div th:replace="~{fragments/footer.html :: footer}"></div>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const statusSelect = document.getElementById('tuitionStatus');
+        const paymentDateInput = document.getElementById('paymentDate');
+        const paymentMethodSelect = document.getElementById('paymentMethod');
+
+        // Logic tự động điền ngày đóng khi chuyển sang "Đã hoàn thành"
+        statusSelect.addEventListener('change', function () {
+            if (this.value === 'PAID') {
+                if (!paymentDateInput.value) {
+                    // Lấy thời gian hiện tại định dạng yyyy-MM-ddThh:mm
+                    const now = new Date();
+                    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                    paymentDateInput.value = now.toISOString().slice(0,16);
+                }
+                paymentDateInput.setAttribute('required', 'required');
+                paymentMethodSelect.setAttribute('required', 'required');
+            } else {
+                paymentDateInput.removeAttribute('required');
+                paymentMethodSelect.removeAttribute('required');
+            }
+        });
+
+        // Trigger lần đầu khi load trang
+        statusSelect.dispatchEvent(new Event('change'));
+    });
+</script>
+</body>
+</html>

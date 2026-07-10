@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head.html :: head('Chi tiết thu học phí')}"></head>
+
+<body>
+<div id="app">
+    <div th:replace="~{fragments/sidebar.html :: sidebar('tuition','')}"></div>
+
+    <div id="main" class="d-flex flex-column min-vh-100">
+        <header class="mb-3">
+            <a href="#" class="burger-btn d-block d-xl-none">
+                <i class="bi bi-justify fs-3"></i>
+            </a>
+        </header>
+
+        <div class="page-heading">
+            <div th:replace="~{fragments/header.html :: topbar('Quản lý học phí')}"></div>
+
+            <div class="page-title mt-2">
+                <div class="row align-items-center">
+                    <div class="col-12 col-md-6 order-md-1 order-last">
+                        <p class="text-subtitle text-muted">Thanh toán học phí cho học viên</p>
+                    </div>
+                    <div class="col-12 col-md-6 order-md-2 order-first">
+                        <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                                <li class="breadcrumb-item"><a th:href="@{/admin/tuitions}">Quản lý học phí</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Thu học phí</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <section class="section">
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-1"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-octagon me-1"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="mb-4">
+                    <a th:href="@{/admin/tuitions}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Quay lại danh sách
+                    </a>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-primary py-3">
+                                <h5 class="card-title text-white m-0"><i class="bi bi-person-badge me-2"></i>Thông tin học viên</h5>
+                            </div>
+                            <div class="card-body mt-3">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted">Mã học viên:</span>
+                                        <span class="fw-bold" th:text="${student.studentCode}"></span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted">Họ và tên:</span>
+                                        <span class="fw-bold text-primary" th:text="${student.fullName}"></span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted">Tổng số tháng nợ:</span>
+                                        <span class="badge bg-danger rounded-pill px-3 py-2" th:text="${unpaidMonths + ' tháng'}"></span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <span class="text-muted">Tổng tiền nợ:</span>
+                                        <span class="text-danger fw-bold fs-5" th:text="${#numbers.formatDecimal(totalDebt, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-success py-3">
+                                <h5 class="card-title text-white m-0"><i class="bi bi-wallet2 me-2"></i>Chi tiết nợ & Thanh toán</h5>
+                            </div>
+                            <div class="card-body mt-3">
+                                <form th:action="@{/admin/tuitions/process-payment}" method="post" id="paymentForm">
+                                    <input type="hidden" name="studentId" th:value="${student.id}" />
+
+                                    <div class="alert alert-light border mb-4">
+                                        <label class="fw-bold text-dark mb-2">Hình thức đóng:</label>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="radio" name="payMode" id="payPeriod" value="PERIOD" checked onchange="handlePayModeChange()">
+                                            <label class="form-check-label" for="payPeriod">Đóng từng kỳ (Chọn các tháng muốn thanh toán bên dưới)</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="payMode" id="payFull" value="FULL" onchange="handlePayModeChange()">
+                                            <label class="form-check-label" for="payFull">Đóng toàn khóa (Thanh toán toàn bộ)</label>
+                                        </div>
+
+                                        <div id="discountBlock" class="mt-3 pt-3 border-top d-none">
+                                            <label class="fw-bold mb-2 text-primary"><i class="bi bi-tag"></i> Chọn mã giảm giá:</label>
+                                            <select class="form-select" id="discountSelect" name="discountId" onchange="calculateTotal()">
+                                                <option value="">-- Không sử dụng mã giảm giá --</option>
+                                                <option th:each="discount : ${validDiscounts}"
+                                                        th:value="${discount.id}"
+                                                        th:data-type="${discount.type}"
+                                                        th:data-value="${discount.discountValue}"
+                                                        th:text="${discount.code + ' - Giảm ' + (discount.type.name() == 'PERCENT' ? discount.discountValue + '%' : #numbers.formatDecimal(discount.discountValue, 0, 'COMMA', 0, 'POINT') + ' đ')}">
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive mb-4">
+                                        <table class="table table-bordered table-hover align-middle mb-0">
+                                            <thead class="table-light">
+                                            <tr>
+                                                <th class="text-center" style="width: 50px;">
+                                                    <input type="checkbox" class="form-check-input" id="checkAll" onchange="toggleAll(this)">
+                                                </th>
+<!--                                                <th>Nội dung nợ</th>-->
+                                                <th class="text-center">Hạn đóng</th>
+                                                <th class="text-end">Số tiền</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:if="${debtList.isEmpty()}">
+                                                <td colspan="4" class="text-center text-success py-4">
+                                                    <i class="bi bi-check-circle-fill fs-2 mb-2 d-block"></i>
+                                                    Học viên đã hoàn thành mọi khoản phí hiện tại.
+                                                </td>
+                                            </tr>
+                                            <tr th:each="debt : ${debtList}">
+                                                <td class="text-center">
+                                                    <input type="checkbox" name="tuitionIds" th:value="${debt.id}"
+                                                           th:data-amount="${debt.amount}"
+                                                           class="form-check-input tuition-cb" onchange="calculateTotal()">
+                                                </td>
+<!--                                                <td class="fw-medium" th:text="${debt.note}"></td>-->
+                                                <td class="text-center" th:text="${#temporals.format(debt.dueDate, 'dd/MM/yyyy')}"></td>
+                                                <td class="text-end fw-bold text-dark" th:text="${#numbers.formatDecimal(debt.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="row align-items-center bg-light p-3 rounded mb-4 mx-0 border">
+                                        <div class="col-md-6 mb-2 mb-md-0">
+                                            <p class="mb-1 text-muted">Đã chọn: <span id="lblSelectedCount" class="fw-bold text-dark fs-6">0</span> tháng</p>
+                                            <p class="mb-1 text-muted">Tạm tính: <span id="lblSubTotal" class="fw-bold text-dark fs-6">0 đ</span></p>
+                                            <p class="mb-0 text-success d-none" id="discountRow">Giảm giá: <span id="lblDiscountAmount" class="fw-bold fs-6">0 đ</span></p>
+                                        </div>
+                                        <div class="col-md-6 text-md-end text-start">
+                                            <h4 class="mb-0 text-success fw-bold">Tổng thanh toán: <br class="d-block d-md-none"><span id="lblFinalTotal">0 đ</span></h4>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-4" th:if="${!debtList.isEmpty()}">
+                                        <div class="col-md-6">
+                                            <label class="fw-bold mb-2">Phương thức thanh toán <span class="text-danger">*</span></label>
+                                            <select class="form-select" name="paymentMethod" id="paymentMethod" required onchange="handlePaymentMethodChange()">
+                                                <option value="CASH">Tiền mặt</option>
+                                                <option value="CREDIT">Chuyển khoản</option>
+                                            </select>
+
+                                            <div id="qrCodeBlock" class="text-center mt-3 d-none p-3 border rounded bg-white shadow-sm">
+                                                <h6 class="fw-bold text-primary mb-2"><i class="bi bi-qr-code-scan me-1"></i> Quét mã để thanh toán</h6>
+                                                <img th:src="@{'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=HOC_PHI_' + ${student.studentCode}}"
+                                                     alt="Mã QR Thanh Toán" class="img-fluid border p-1" style="max-width: 150px;">
+                                                <div class="mt-2 text-muted small">
+                                                    Nội dung CK: <strong th:text="${student.studentCode} + ' THANH TOAN HOC PHI'"></strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mt-3 mt-md-0">
+                                            <label class="fw-bold mb-2">Ghi chú</label>
+                                            <textarea class="form-control" name="note" rows="3" placeholder="Nhập ghi chú giao dịch (nếu có)..."></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="text-end" th:if="${!debtList.isEmpty()}">
+                                        <button type="submit" class="btn btn-success px-5 py-2 fw-bold" id="btnSubmitPayment" disabled>
+                                            <i class="bi bi-check2-circle me-1"></i> Xác nhận thu tiền
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div th:replace="~{fragments/footer.html :: footer}"></div>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+
+<script>
+    function handlePayModeChange() {
+        const isFullPay = document.getElementById('payFull').checked;
+        const checkboxes = document.querySelectorAll('.tuition-cb');
+        const checkAll = document.getElementById('checkAll');
+        const discountBlock = document.getElementById('discountBlock');
+        const discountSelect = document.getElementById('discountSelect');
+
+        if (isFullPay) {
+            checkboxes.forEach(cb => {
+                cb.checked = true;
+                cb.style.pointerEvents = 'none';
+            });
+            if(checkAll) {
+                checkAll.checked = true;
+                checkAll.disabled = true;
+            }
+            // Hiện dropdown chọn mã giảm giá
+            discountBlock.classList.remove('d-none');
+        } else {
+            checkboxes.forEach(cb => {
+                cb.style.pointerEvents = 'auto';
+            });
+            if(checkAll) {
+                checkAll.disabled = false;
+            }
+            // Ẩn dropdown và reset về mặc định
+            discountBlock.classList.add('d-none');
+            discountSelect.value = '';
+        }
+        calculateTotal();
+    }
+
+    function toggleAll(source) {
+        const checkboxes = document.querySelectorAll('.tuition-cb');
+        checkboxes.forEach(cb => {
+            if(cb.style.pointerEvents !== 'none') {
+                cb.checked = source.checked;
+            }
+        });
+        calculateTotal();
+    }
+
+    function calculateTotal() {
+        const checkboxes = document.querySelectorAll('.tuition-cb:checked');
+        const isFullPay = document.getElementById('payFull').checked;
+
+        let subTotal = 0;
+        let selectedCount = checkboxes.length;
+
+        checkboxes.forEach(cb => {
+            subTotal += parseFloat(cb.getAttribute('data-amount') || 0);
+        });
+
+        // TÍNH TOÁN GIẢM GIÁ
+        let discountAmount = 0;
+        if (isFullPay) {
+            const discountSelect = document.getElementById('discountSelect');
+            if (discountSelect && discountSelect.selectedIndex > 0) {
+                const selectedOption = discountSelect.options[discountSelect.selectedIndex];
+                const type = selectedOption.getAttribute('data-type'); // PERCENT hoặc AMOUNT
+                const value = parseFloat(selectedOption.getAttribute('data-value'));
+
+                if (type === 'PERCENT') {
+                    discountAmount = subTotal * (value / 100);
+                } else if (type === 'AMOUNT') {
+                    discountAmount = value;
+                }
+
+                // Chặn không cho giảm quá tổng tiền nợ
+                if (discountAmount > subTotal) {
+                    discountAmount = subTotal;
+                }
+            }
+        }
+
+        let finalTotal = subTotal - discountAmount;
+
+        // CẬP NHẬT LÊN GIAO DIỆN UI
+        document.getElementById('lblSelectedCount').textContent = selectedCount;
+        document.getElementById('lblSubTotal').textContent = subTotal.toLocaleString('vi-VN') + ' đ';
+
+        const discountRow = document.getElementById('discountRow');
+        if (discountAmount > 0) {
+            discountRow.classList.remove('d-none');
+            document.getElementById('lblDiscountAmount').textContent = '- ' + discountAmount.toLocaleString('vi-VN') + ' đ';
+        } else {
+            discountRow.classList.add('d-none');
+        }
+
+        document.getElementById('lblFinalTotal').textContent = finalTotal.toLocaleString('vi-VN') + ' đ';
+
+        // Cập nhật lại QR data theo số tiền và mã học viên nếu cần (Tùy chọn nâng cao)
+        // Hiện tại chỉ để QR tĩnh theo mã sinh viên
+
+        const btnSubmit = document.getElementById('btnSubmitPayment');
+        if (btnSubmit) {
+            btnSubmit.disabled = (selectedCount === 0);
+        }
+
+        const allCbCount = document.querySelectorAll('.tuition-cb').length;
+        const checkAll = document.getElementById('checkAll');
+        if(checkAll && allCbCount > 0) {
+            checkAll.checked = (selectedCount === allCbCount);
+        }
+    }
+
+    // Logic mới: Ẩn/Hiện QR Code theo phương thức thanh toán
+    function handlePaymentMethodChange() {
+        const method = document.getElementById('paymentMethod').value;
+        const qrBlock = document.getElementById('qrCodeBlock');
+
+        if (method === 'CREDIT') {
+            qrBlock.classList.remove('d-none');
+            // Thêm hiệu ứng trượt nhẹ (tuỳ chọn)
+            qrBlock.classList.add('animate__animated', 'animate__fadeIn');
+        } else {
+            qrBlock.classList.add('d-none');
+            qrBlock.classList.remove('animate__animated', 'animate__fadeIn');
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        calculateTotal();
+
+        // Khởi tạo trạng thái ban đầu cho QR (tránh trường hợp trình duyệt lưu cache dropdown)
+        const paymentSelect = document.getElementById('paymentMethod');
+        if (paymentSelect) {
+            handlePaymentMethodChange();
+        }
+    });
+</script>
+
+</body>
+</html>

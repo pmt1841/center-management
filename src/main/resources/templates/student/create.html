@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head.html :: head('Thêm Học viên')}"></head>
+<body>
+
+<div id="app">
+  <div th:replace="~{fragments/sidebar.html :: sidebar('list','student')}"></div>
+
+  <div id="main" class="d-flex flex-column min-vh-100">
+    <header class="mb-3">
+      <a href="#" class="burger-btn d-block d-xl-none">
+        <i class="bi bi-justify fs-3"></i>
+      </a>
+    </header>
+
+    <div class="page-heading">
+      <div class="page-title">
+        <div class="row">
+          <div class="col-12 col-md-6 order-md-1 order-last">
+            <h3>Thêm mới Học viên</h3>
+            <p class="text-subtitle text-muted">Nhập hồ sơ học viên và phân lớp</p>
+          </div>
+          <div class="col-12 col-md-6 order-md-2 order-first">
+            <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/students}">Danh sách học viên</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Thêm mới</li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <section id="multiple-column-form">
+        <div class="row match-height">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-content">
+                <div class="card-body">
+
+                  <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible show fade">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+
+                  <form class="form" th:action="@{/students/create}" th:object="${student}" method="POST" novalidate>
+                    <div class="row">
+
+                      <div class="col-md-6 col-12 mb-3">
+                        <div class="form-group mandatory">
+                          <label for="fullName" class="form-label fw-bold">Họ và tên <span class="text-danger">*</span></label>
+                          <div class="position-relative">
+                            <i class="bi bi-person position-absolute top-50 translate-middle-y text-muted ms-3"></i>
+                            <input type="text" id="fullName" class="form-control ps-5"
+                                   th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid' : ''"
+                                   placeholder="Nhập họ và tên" th:field="*{fullName}">
+                          </div>
+                          <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-12 mb-3">
+                        <div class="form-group mandatory">
+                          <label for="email" class="form-label fw-bold">Địa chỉ Email <span class="text-danger">*</span></label>
+                          <div class="position-relative">
+                            <i class="bi bi-envelope position-absolute top-50 translate-middle-y text-muted ms-3"></i>
+                            <input type="email" id="email" class="form-control ps-5"
+                                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                   placeholder="VD: nguyenvena@gmail.com" th:field="*{email}">
+                          </div>
+                          <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-12 mb-3">
+                        <div class="form-group mandatory">
+                          <label for="phone" class="form-label fw-bold">Số điện thoại <span class="text-danger">*</span></label>
+                          <div class="position-relative">
+                            <i class="bi bi-telephone position-absolute top-50 translate-middle-y text-muted ms-3"></i>
+                            <input type="text" id="phone" class="form-control ps-5"
+                                   th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid' : ''"
+                                   placeholder="VD: 0987654321" th:field="*{phoneNumber}">
+                          </div>
+                          <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-12 mb-3">
+                        <div class="form-group mandatory">
+                          <label for="identity" class="form-label fw-bold">Căn cước công dân <span class="text-danger">*</span></label>
+                          <div class="position-relative">
+                            <i class="bi bi-credit-card-2-front position-absolute top-50 translate-middle-y text-muted ms-3"></i>
+                            <input type="text" id="identity" class="form-control ps-5"
+                                   th:classappend="${#fields.hasErrors('identity')} ? 'is-invalid' : ''"
+                                   placeholder="Nhập số CCCD" th:field="*{identity}">
+                          </div>
+                          <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('identity')}" th:errors="*{identity}"></div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-12 mb-3">
+                        <div class="form-group">
+                          <label for="dateOfBirth" class="form-label fw-bold">Ngày sinh</label>
+                          <div class="position-relative">
+                            <i class="bi bi-calendar-date position-absolute top-50 translate-middle-y text-muted ms-3"></i>
+                            <input type="date" id="dateOfBirth" class="form-control ps-5"
+                                   th:classappend="${#fields.hasErrors('dateOfBirth')} ? 'is-invalid' : ''"
+                                   th:field="*{dateOfBirth}">
+                          </div>
+                          <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}"></div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-12 mb-3">
+                        <div class="form-group">
+                          <label for="courseFilter" class="form-label fw-bold">Khóa học</label>
+                          <div class="position-relative">
+                            <i class="bi bi-book position-absolute top-50 translate-middle-y text-muted ms-3"></i>
+                            <select class="form-select ps-5" id="courseFilter">
+                              <option value="">-- Chọn khóa học trước --</option>
+                              <option th:each="co : ${courses}"
+                                      th:value="${co.id}"
+                                      th:text="${co.courseName}">
+                              </option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-12 mb-3">
+                        <div class="form-group">
+                          <label for="classroom" class="form-label fw-bold">Xếp Lớp</label>
+                          <div class="position-relative">
+                            <i class="bi bi-door-open position-absolute top-50 translate-middle-y text-muted ms-3"></i>
+                            <select class="form-select ps-5" id="classroom" th:field="*{classroomId}"
+                                    th:classappend="${#fields.hasErrors('classroomId')} ? 'is-invalid' : ''">
+                              <option value="">-- Chưa xếp lớp --</option>
+                              <option th:each="cls : ${classrooms}"
+                                      th:value="${cls.id}"
+                                      th:attr="data-course-id=${cls.course.id}"
+                                      th:text="${cls.className} + ' (' + ${cls.classCode} + ')'">
+                              </option>
+                            </select>
+                          </div>
+                          <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('classroomId')}" th:errors="*{classroomId}"></div>
+                        </div>
+                      </div>
+
+                      <div class="col-12 mb-3">
+                        <div class="form-group">
+                          <label for="address" class="form-label fw-bold"><i class="bi bi-geo-alt me-1"></i> Địa chỉ</label>
+                          <textarea id="address" class="form-control" rows="2"
+                                    th:classappend="${#fields.hasErrors('address')} ? 'is-invalid' : ''"
+                                    placeholder="Nhập địa chỉ chi tiết" th:field="*{address}"></textarea>
+                          <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
+                        </div>
+                      </div>
+
+                      <div class="col-12 d-flex justify-content-end mt-4 gap-2">
+                        <a th:href="@{/students}" class="btn btn-light-secondary d-flex align-items-center gap-1">
+                          <i class="bi bi-x-circle"></i> Hủy bỏ
+                        </a>
+                        <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                          <i class="bi bi-save"></i> Lưu thông tin
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div th:replace="~{fragments/footer.html :: footer}"></div>
+  </div>
+</div>
+
+<th:block th:replace="~{fragments/script.html :: script}"></th:block>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const courseSelect = document.getElementById("courseFilter");
+    const classroomSelect = document.getElementById("classroom");
+
+    const allClassOptions = Array.from(classroomSelect.options);
+
+    function filterClassrooms() {
+      const selectedCourseId = courseSelect.value;
+      classroomSelect.innerHTML = "";
+      classroomSelect.appendChild(allClassOptions[0]);
+
+      if (selectedCourseId) {
+        const filteredOptions = allClassOptions.filter(opt =>
+                opt.getAttribute('data-course-id') === selectedCourseId
+        );
+        filteredOptions.forEach(opt => classroomSelect.appendChild(opt));
+      }
+      classroomSelect.value = "";
+    }
+
+    courseSelect.addEventListener("change", filterClassrooms);
+    filterClassrooms();
+  });
+</script>
+
+</body>
+</html>
